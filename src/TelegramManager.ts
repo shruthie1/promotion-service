@@ -42,7 +42,7 @@ class TelegramManager {
         console.log("Connected Client : ", me.phone, me.username);
         if (handler && TelegramManager.client) {
             console.log("Adding event Handler")
-            TelegramManager.client.addEventHandler(async (event) => { await this.handleEvents(event); }, new NewMessage());
+            TelegramManager.client.addEventHandler(this.handleEvents, new NewMessage());
         }
         // PromoteToGrp(TelegramManager.client)
         return TelegramManager.client
