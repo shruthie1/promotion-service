@@ -24,6 +24,10 @@ app.get('/exit', (req, res, next) => {
   process.exit(1);
 })
 
+
+app.get('/getprocessid', (req, res, next) => {
+  res.send({ProcessId: prcessID});
+})
 app.get('/sendtoall', (req, res, next) => {
   res.send(`Sending ${req.query.query}`);
   next()
