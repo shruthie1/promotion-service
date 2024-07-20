@@ -32,6 +32,8 @@ class TelegramManager {
         console.log("ArchivedClient : ", result2.data)
         TelegramManager.client = new TelegramClient(new StringSession(result2.data.session), parseInt(process.env.API_ID), process.env.API_HASH, {
             connectionRetries: 5,
+            useIPV6: true,
+            useWSS: true
         });
         TelegramManager.client.setLogLevel(LogLevel.ERROR);
         //TelegramManager.client._errorHandler = this.errorHandler
