@@ -1,10 +1,10 @@
-import { fetchWithTimeout } from "out";
 import { TelegramClient, Api } from "telegram";
 import { NewMessage, NewMessageEvent } from "telegram/events";
 import { LogLevel } from "telegram/extensions/Logger";
 import { StringSession } from "telegram/sessions";
 import { setSendPing } from "./connection";
 import { react } from "./react";
+import { fetchWithTimeout } from "./fetchWithTimeout";
 
 class TelegramManager {
 

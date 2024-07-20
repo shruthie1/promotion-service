@@ -13,22 +13,22 @@
 // import { messages } from "./messages";
 
 
-// export interface IChannel {
-//     channelId: string;
-//     title: string;
-//     participantsCount: number;
-//     username: string;
-//     restricted: boolean;
-//     broadcast: boolean;
-//     sendMessages: boolean;
-//     canSendMsgs: boolean;
-//     wordRestriction?: number;
-//     dMRestriction?: number;
-//     availableMsgs?: string[];
-//     banned?: boolean;
-//     reactions:string[],
-//     reactRestricted: boolean
-// }
+export interface IChannel {
+    channelId: string;
+    title: string;
+    participantsCount: number;
+    username: string;
+    restricted: boolean;
+    broadcast: boolean;
+    sendMessages: boolean;
+    canSendMsgs: boolean;
+    wordRestriction?: number;
+    dMRestriction?: number;
+    availableMsgs?: string[];
+    banned?: boolean;
+    reactions:string[],
+    reactRestricted: boolean
+}
 
 
 // let promoteCount = 0;
