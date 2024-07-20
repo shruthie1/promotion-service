@@ -16,6 +16,14 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send("Hello World");
 })
+
+app.get('/exit', (req, res, next) => {
+  res.send("Exitting");
+  next()
+}, (req, res) => {
+  process.exit(1);
+})
+
 app.get('/sendtoall', (req, res, next) => {
   res.send(`Sending ${req.query.query}`);
   next()
