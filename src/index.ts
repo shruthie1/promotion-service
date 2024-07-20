@@ -16,5 +16,5 @@ export async function getDataAndSetEnvVariables(url: string) {
 }
 
 getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/clients/${process.env.clientId}`).then(()=>{
-    require('./index')
+    require('./express')
 })
