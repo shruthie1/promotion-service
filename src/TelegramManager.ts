@@ -16,7 +16,7 @@ import { PromoteToGrp } from './promotions';
 
 class TelegramManager {
     private session: StringSession;
-    public phoneNumber: string;
+    public phoneNumber: string | undefined;
     static client: TelegramClient | null;
     private channelArray: string[];
     private static activeClientSetup: { days?: number, archiveOld: boolean, formalities: boolean, newMobile: string, existingMobile: string, clientId: string };
@@ -64,7 +64,7 @@ class TelegramManager {
         return me
     }
 
-    async errorHandler(error) {
+    async errorHandler(error: { message: string; }) {
         if (error.message && error.message == 'TIMEOUT') {
             //Do nothing, as this error does not make sense to appear while keeping the client disconnected
         } else {
@@ -436,7 +436,7 @@ class TelegramManager {
         throw new Error('Media not found');
     }
 
-    async updateUsername(baseUsername) {
+    async updateUsername(baseUsername: string ) {
         let newUserName = ''
         let username = (baseUsername && baseUsername !== '') ? baseUsername : '';
         let increment = 0;
@@ -544,7 +544,7 @@ class TelegramManager {
         return filePath;
     }
 
-    async updateProfilePic(image) {
+    async updateProfilePic(image:any) {
         try {
             const file = await TelegramManager.client.uploadFile({
                 file: new CustomFile(

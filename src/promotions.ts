@@ -241,7 +241,7 @@ async function sendPromotionalMessage(channelId: string, client: TelegramClient,
                 promotedCount++;
                 retryMessageSending(client, channelInfo, message?.id, undefined, false, defaultMsg);
                 scheduleFollowUpMessage(client, channelInfo);
-                const outerLimit = 240000;
+                const outerLimit = 180000;
                 await sleep(outerLimit)
                 return;
             } else {

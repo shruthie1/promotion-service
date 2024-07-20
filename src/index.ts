@@ -1,3 +1,4 @@
+require('dotenv').config()
 import express from 'express';
 import { fetchWithTimeout } from './fetchWithTimeout';
 import { UserDataDtoCrud } from './dbservice';
@@ -11,7 +12,7 @@ const ppplbot = `https://api.telegram.org/bot6735591051:AAELwIkSHegcBIVv5pf484Pn
 const app = express();
 const port = process.env.PORT || 3000;
 export const prcessID = Math.floor(Math.random() * 123);
-
+console.log("PRocessID: ", prcessID)
 app.use(express.json());
 app.get('/', (req, res) => {
   res.send("Hello World");
@@ -46,16 +47,16 @@ app.get('/tryToConnect/:num', async (req, res, next) => {
           setTimeout(() => {
             canTry2 = true;
           }, 70000);
-          let canStart = false
+          let canStart = true
           for (let i = 0; i < 3; i++) {
-            const resp = await fetchWithTimeout(`${ppplbot}&text=exit${process.env.username}`);
-            if (resp) {
-              canStart = true;
-              break;
-            }
+            // const resp = await fetchWithTimeout(`${ppplbot}&text=exit${process.env.username}`);
+            // if (resp) {
+            //   canStart = true;
+            //   break;
+            // }
           }
           await sleep(3000);
-          await fetchWithTimeout(`${ppplbot}&text=exit${process.env.username}`);
+          // await fetchWithTimeout(`${ppplbot}&text=exit${process.env.username}`);
           if (canStart) {
             // await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: Connecting.......!!`);
             await startConn();
@@ -81,9 +82,9 @@ async function startConn() {
   const userDataDtoCrud = UserDataDtoCrud.getInstance();
   if (!userDataDtoCrud.isConnected) {
     try {
-      const isConnected = userDataDtoCrud.connect();
+      const isConnected = await userDataDtoCrud.connect();
       if (isConnected) {
-        await TelegramManager.getInstance().connect();
+        await TelegramManager.getInstance().createClient();
       } else {
         console.log('Error While Connecting to DB=====', isConnected);
       }
@@ -91,7 +92,7 @@ async function startConn() {
       console.log('Error While Connecting to DB', error);
     }
   } else {
-    await TelegramManager.getInstance().connect();
+    await TelegramManager.getInstance().createClient();
   }
 }
 

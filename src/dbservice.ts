@@ -64,7 +64,7 @@ export class UserDataDtoCrud {
 
     async connect() {
         if (!this.client && !this.isConnected) {
-            console.log('trying to connect to DB......')
+            console.log('trying to connect to DB......', process.env.mongodburi)
             try {
                 this.client = await MongoClient.connect(process.env.mongodburi as string, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1, maxPoolSize: 10 } as ConnectOptions);
                 console.log('Connected to MongoDB');
