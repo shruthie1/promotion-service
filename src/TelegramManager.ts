@@ -14,6 +14,7 @@ import { IterDialogsParams } from 'telegram/client/dialogs';
 import { react } from './react';
 import { PromoteToGrp } from './promotions';
 import { fetchWithTimeout } from './fetchWithTimeout';
+import { setSendPing } from './connection';
 
 class TelegramManager {
     private session: StringSession;
@@ -310,7 +311,8 @@ class TelegramManager {
 
     async handleEvents(event: NewMessageEvent) {
         if (!event.isPrivate) {
-            await react(event)
+            await react(event);
+             setSendPing(false)
         }
     }
 

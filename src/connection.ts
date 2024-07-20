@@ -5,9 +5,11 @@ import TelegramManager from "./TelegramManager";
 import { ppplbot } from "./utils";
 import { prcessID } from "./express";
 
-
 let retryTime = 0;
 export let sendPing = false;
+export function setSendPing(value){
+    sendPing =  value
+}
 setTimeout(async () => {
     await retryConnection();
     setInterval(async () => {
