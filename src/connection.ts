@@ -3,7 +3,7 @@ import { fetchWithTimeout } from "./fetchWithTimeout";
 import { parseError } from "./parseError";
 import TelegramManager from "./TelegramManager";
 import { ppplbot } from "./utils";
-import { prcessID } from "./index";
+import { prcessID } from "./express";
 
 
 let retryTime = 0;

@@ -1,9 +1,10 @@
 {
   "name": "helper",
   "version": "1.0.0",
-  "main": "config.js",
+  "main": "index.js",
   "scripts": {
     "start": "node  --max-old-space-size=8192 ./out/index.js",
+    "start:node": "ts-node index.ts",
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "npm i && npm run webpack",
     "webpack-dev": "webpack --watch --mode development",
