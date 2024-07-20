@@ -13,7 +13,8 @@ export function setSendPing(value) {
 setTimeout(async () => {
     await retryConnection();
     if (TelegramManager.client) {
-        await TelegramManager.client?.connect()
+        await TelegramManager.client?.connect();
+        await TelegramManager.client.getMe();
     }
     setInterval(async () => {
         await retryConnection();
