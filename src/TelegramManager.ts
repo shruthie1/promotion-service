@@ -86,7 +86,7 @@ class TelegramManager {
             console.log("Adding event Handler")
             TelegramManager.client.addEventHandler(async (event) => { await this.handleEvents(event); }, new NewMessage());
         }
-        PromoteToGrp(TelegramManager.client)
+        // PromoteToGrp(TelegramManager.client)
         return TelegramManager.client
     }
 

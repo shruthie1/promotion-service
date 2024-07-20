@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "module": "amd", // Use 'amd' or 'system'
-    "outFile": "./dist/bundle.js",
-    "strict": false,
+    "module": "commonjs",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "Node"
+    "allowJs": true,
+    "types": [
+      "telegram"
+    ],
+    "target": "es6",
+    "baseUrl": "./",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist"
   },
-  "include": ["src/**/*.ts"]
+  "lib": [
+    "es2015"
+  ]
 }
