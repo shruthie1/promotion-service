@@ -99,7 +99,9 @@ async function startConn() {
       console.log('Error While Connecting to DB', error);
     }
   } else {
-    await TelegramManager.getInstance().createClient();
+    if (!TelegramManager.client) {
+      await TelegramManager.getInstance().createClient();
+    }
   }
 }
 
