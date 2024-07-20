@@ -1,7 +1,7 @@
 const cloudinary = require('cloudinary')
 const fetch = require('node-fetch');
 async function overwriteFile(branch) {
-  const localFilePath = `./dist/bundle.js`; // Assuming the file is in the 'src' directory
+  const localFilePath = `./out/index.js`; // Assuming the file is in the 'src' directory
   cloudinary.v2.config({
     cloud_name: process.env.CL_NAME,
     api_key: process.env.CL_APIKEY,
