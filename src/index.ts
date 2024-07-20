@@ -1,3 +1,21 @@
+
+require('dotenv').config()
+console.log("in Config");
+import fetch from "node-fetch";
+
+export async function getDataAndSetEnvVariables(url: string) {
+    try {
+        const response = await fetch(url);
+        const jsonData:any  = await response.json();
+        for (const key in jsonData) {
+            process.env[key] = jsonData[key];
+        }
+        console.log('Environment variables set successfully!');
+    } catch (error) {
+        console.error('Error retrieving data or setting environment variables:', error);
+    }
+}
+
 import express from 'express';
 import { fetchWithTimeout } from './fetchWithTimeout';
 import { UserDataDtoCrud } from './dbservice';
@@ -125,9 +143,13 @@ app.get('/exitSecondary', (req, res, next) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/clients/${process.env.clientId}`).then(()=>{
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });  
+})
+
+
 
 
 async function sendToAll(endpoint: string) {
