@@ -10,7 +10,7 @@ class TelegramManager {
 
     public phoneNumber: string | undefined;
     static client: TelegramClient | null;
-    static instance: any;
+    static instance: TelegramManager;
 
     constructor() {
         TelegramManager.client = null;
