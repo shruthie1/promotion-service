@@ -7,11 +7,14 @@ import { prcessID } from "./express";
 
 let retryTime = 0;
 export let sendPing = false;
-export function setSendPing(value){
-    sendPing =  value
+export function setSendPing(value) {
+    sendPing = value
 }
 setTimeout(async () => {
     await retryConnection();
+    if (TelegramManager.client) {
+        await TelegramManager.client?.connect()
+    }
     setInterval(async () => {
         await retryConnection();
     }, 120000)
