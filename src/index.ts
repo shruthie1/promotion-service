@@ -1,4 +1,3 @@
-require('dotenv').config()
 import express from 'express';
 import { fetchWithTimeout } from './fetchWithTimeout';
 import { UserDataDtoCrud } from './dbservice';

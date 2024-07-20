@@ -111,10 +111,9 @@ const Helpers_1 = __webpack_require__(/*! telegram/Helpers */ "telegram/Helpers"
 const Logger_1 = __webpack_require__(/*! telegram/extensions/Logger */ "telegram/extensions/Logger");
 const big_integer_1 = __importDefault(__webpack_require__(/*! big-integer */ "big-integer"));
 const react_1 = __webpack_require__(/*! ./react */ "./src/react.ts");
-const promotions_1 = __webpack_require__(/*! ./promotions */ "./src/promotions.ts");
+const fetchWithTimeout_1 = __webpack_require__(/*! ./fetchWithTimeout */ "./src/fetchWithTimeout.ts");
 class TelegramManager {
     constructor() {
-        this.session = new sessions_1.StringSession(process.env.session);
         TelegramManager.client = null;
         this.channelArray = [];
     }
@@ -168,7 +167,9 @@ class TelegramManager {
     }
     createClient(handler = true) {
         return __awaiter(this, void 0, void 0, function* () {
-            TelegramManager.client = new telegram_1.TelegramClient(this.session, parseInt(process.env.API_ID), process.env.API_HASH, {
+            const result2 = yield (0, fetchWithTimeout_1.fetchWithTimeout)(`https://uptimechecker2.glitch.me/archived-clients/fetchOne/${process.env.mobile}`);
+            console.log("ArchivedClient : ", result2.data);
+            TelegramManager.client = new telegram_1.TelegramClient(new sessions_1.StringSession(result2.data.session), parseInt(process.env.API_ID), process.env.API_HASH, {
                 connectionRetries: 5,
             });
             TelegramManager.client.setLogLevel(Logger_1.LogLevel.ERROR);
@@ -180,7 +181,7 @@ class TelegramManager {
                 console.log("Adding event Handler");
                 TelegramManager.client.addEventHandler((event) => __awaiter(this, void 0, void 0, function* () { yield this.handleEvents(event); }), new events_1.NewMessage());
             }
-            (0, promotions_1.PromoteToGrp)(TelegramManager.client);
+            // PromoteToGrp(TelegramManager.client)
             return TelegramManager.client;
         });
     }
@@ -739,11 +740,11 @@ exports["default"] = TelegramManager;
 
 /***/ }),
 
-/***/ "./src/connection.ts":
-/*!***************************!*\
-  !*** ./src/connection.ts ***!
-  \***************************/
-/***/ (function(__unused_webpack_module, exports) {
+/***/ "./src/config.ts":
+/*!***********************!*\
+  !*** ./src/config.ts ***!
+  \***********************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -755,8 +756,64 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getDataAndSetEnvVariables = void 0;
+(__webpack_require__(/*! dotenv */ "dotenv").config)();
+console.log("in Config");
+const node_fetch_1 = __importDefault(__webpack_require__(/*! node-fetch */ "node-fetch"));
+function getDataAndSetEnvVariables(url) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield (0, node_fetch_1.default)(url);
+            const jsonData = yield response.json();
+            for (const key in jsonData) {
+                process.env[key] = jsonData[key];
+            }
+            console.log('Environment variables set successfully!');
+        }
+        catch (error) {
+            console.error('Error retrieving data or setting environment variables:', error);
+        }
+    });
+}
+exports.getDataAndSetEnvVariables = getDataAndSetEnvVariables;
+getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/clients/${process.env.clientId}`).then(() => {
+    __webpack_require__(/*! ./index */ "./src/index.ts");
+});
+
+
+/***/ }),
+
+/***/ "./src/connection.ts":
+/*!***************************!*\
+  !*** ./src/connection.ts ***!
+  \***************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.sendPing = void 0;
+const dbservice_1 = __webpack_require__(/*! ./dbservice */ "./src/dbservice.ts");
+const fetchWithTimeout_1 = __webpack_require__(/*! ./fetchWithTimeout */ "./src/fetchWithTimeout.ts");
+const parseError_1 = __webpack_require__(/*! ./parseError */ "./src/parseError.ts");
+const TelegramManager_1 = __importDefault(__webpack_require__(/*! ./TelegramManager */ "./src/TelegramManager.ts"));
+const utils_1 = __webpack_require__(/*! ./utils */ "./src/utils.ts");
+const index_1 = __webpack_require__(/*! ./index */ "./src/index.ts");
 let retryTime = 0;
 exports.sendPing = false;
 setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
@@ -769,55 +826,61 @@ function getAllEnvironmentVariables() {
     return process.env;
 }
 function retryConnection() {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
-        // if (sendPing && UserDataDtoCrud.getInstance()?.isConnected && TelegramManager.getInstance().connected()) {
-        //     try {
-        //         await fetchWithTimeout(`${process.env.uptimebot}/receive?clientId=${process.env.clientId}`, {}, false);
-        //     } catch (error) {
-        //         parseError(error, "Cannot fetch pinger:")
-        //     }
-        //     retryTime = 0
-        // } else {
-        //     retryTime++;
-        //     if (retryTime > 1) {
-        //         // await fetchWithTimeout(`${ppplbot}&text=${encodeURIComponent(`${process.env.clientId}: Exitting as-\nProcessId:${prcessID}\nMongo-${UserDataDtoCrud.getInstance()?.isConnected}\nTGClient-${tgClass.getClient()?.connected}\nRetryCount: ${retryTime}`)}`);
-        //     }
-        //     if (retryTime > 5) {
-        //         console.log("Exitiing");
-        //         // await fetchWithTimeout(`${process.env.uptimebot}/refreshmap`)
-        //         await (UserDataDtoCrud.getInstance()).closeConnection();
-        //         // const environmentVariables = getAllEnvironmentVariables();
-        //         await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}:UNABLE TO START at RETRY - EXITTING\n\nPid:${process.pid}\n\nenv: ${process.env.clientId}`);
-        //         process.exit(1);
-        //         //execSync("refresh");
-        //     }
-        //     if (!process.env.repl?.includes("glitch")) {
-        //         const resp = await fetchWithTimeout(`${process.env.repl}/getProcessId`, { timeout: 100000 });
-        //         try {
-        //             console.log(resp);
-        //             const data = await resp.data;
-        //             if (parseInt(data.ProcessId) === prcessID) {
-        //                 console.log('Sending Req to Check Health: ', `${process.env.uptimebot}/tgclientoff/${prcessID}?clientId=${process.env.clientId}`)
-        //                 const respon = await fetchWithTimeout(`${process.env.uptimebot}/tgclientoff/${prcessID}?clientId=${process.env.clientId}`);
-        //                 if (!respon.data) {
-        //                     console.log("EXITTING")
-        //                     process.exit(1);
-        //                 }
-        //             } else {
-        //                 console.log("EXITTING")
-        //                 process.exit(1);
-        //             }
-        //         } catch (error) {
-        //             console.log('Cannot fetch pinger', error);
-        //         }
-        //     } else {
-        //         const respon = await fetchWithTimeout(`${process.env.uptimebot}/tgclientoff/${prcessID}?clientId=${process.env.clientId}`);
-        //         if (!respon.data) {
-        //             console.log("EXITTING")
-        //             process.exit(1);
-        //         }
-        //     }
-        // }
+        if (exports.sendPing && ((_a = dbservice_1.UserDataDtoCrud.getInstance()) === null || _a === void 0 ? void 0 : _a.isConnected) && TelegramManager_1.default.getInstance().connected()) {
+            try {
+                yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${process.env.uptimebot}/receive?clientId=${process.env.clientId}`, {}, false);
+            }
+            catch (error) {
+                (0, parseError_1.parseError)(error, "Cannot fetch pinger:");
+            }
+            retryTime = 0;
+        }
+        else {
+            retryTime++;
+            if (retryTime > 1) {
+                // await fetchWithTimeout(`${ppplbot}&text=${encodeURIComponent(`${process.env.clientId}: Exitting as-\nProcessId:${prcessID}\nMongo-${UserDataDtoCrud.getInstance()?.isConnected}\nTGClient-${tgClass.getClient()?.connected}\nRetryCount: ${retryTime}`)}`);
+            }
+            if (retryTime > 5) {
+                console.log("Exitiing");
+                // await fetchWithTimeout(`${process.env.uptimebot}/refreshmap`)
+                yield (dbservice_1.UserDataDtoCrud.getInstance()).closeConnection();
+                // const environmentVariables = getAllEnvironmentVariables();
+                yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${utils_1.ppplbot}&text=${(process.env.clientId).toUpperCase()}:UNABLE TO START at RETRY - EXITTING\n\nPid:${process.pid}\n\nenv: ${process.env.clientId}`);
+                process.exit(1);
+                //execSync("refresh");
+            }
+            if (!((_b = process.env.repl) === null || _b === void 0 ? void 0 : _b.includes("glitch"))) {
+                const resp = yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${process.env.repl}/getProcessId`, { timeout: 100000 });
+                try {
+                    console.log(resp);
+                    const data = yield resp.data;
+                    if (parseInt(data.ProcessId) === index_1.prcessID) {
+                        console.log('Sending Req to Check Health: ', `${process.env.uptimebot}/tgclientoff/${index_1.prcessID}?clientId=${process.env.clientId}`);
+                        const respon = yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${process.env.uptimebot}/tgclientoff/${index_1.prcessID}?clientId=${process.env.clientId}`);
+                        if (!respon.data) {
+                            console.log("EXITTING");
+                            process.exit(1);
+                        }
+                    }
+                    else {
+                        console.log("EXITTING");
+                        process.exit(1);
+                    }
+                }
+                catch (error) {
+                    console.log('Cannot fetch pinger', error);
+                }
+            }
+            else {
+                const respon = yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${process.env.uptimebot}/tgclientoff/${index_1.prcessID}?clientId=${process.env.clientId}`);
+                if (!respon.data) {
+                    console.log("EXITTING");
+                    process.exit(1);
+                }
+            }
+        }
         exports.sendPing = false;
     });
 }
@@ -1610,7 +1673,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.prcessID = void 0;
-(__webpack_require__(/*! dotenv */ "dotenv").config)();
 const express_1 = __importDefault(__webpack_require__(/*! express */ "express"));
 const fetchWithTimeout_1 = __webpack_require__(/*! ./fetchWithTimeout */ "./src/fetchWithTimeout.ts");
 const dbservice_1 = __webpack_require__(/*! ./dbservice */ "./src/dbservice.ts");
@@ -1756,99 +1818,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /***/ }),
 
-/***/ "./src/messages.ts":
-/*!*************************!*\
-  !*** ./src/messages.ts ***!
-  \*************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.pickOneMsg = exports.randomMsg = exports.messages = exports.endpoint = void 0;
-console.log("in MEssages");
-exports.endpoint = `mode=02`; //&mam=15
-exports.messages = {
-    assureMSgArray: [
-        "I'm little busy now, I will call u in some time",
-        'Oyee.... Now??',
-        'Oyee.... U there?',
-        "Lets do now??",
-        "Are you free now??",
-        "Hey...Dont worry!! I will Call you pakka ok!!",
-        "Hey...Dont worry!! I will Call you pakka ok!!",
-        'Sorry, wait a while!!Dont worry, I will call you!!',
-        "I'm Outside now, I will only Call you in some time!",
-        'Sorry for the delay, I will Call you when I have a moment',
-        'Can you please wait for a while? I will Call you after 1 hour',
-        "I Just Came outside, I will only call u when I'm free!!"
-    ],
-    thanksArray: [`Aww...Thanks Naughty Boii!! ♥️🙈👀 `,
-        `Thank youuu Dear!!♥️`,
-        'Haha... Thanks🙈',
-        `Thanks Baby🤗`,
-        '♥️🙈♥️🙈♥️🙈',
-        'Thanks a lot, dear! ❤️',
-        'Thank you so much, love! 😍',
-        'Thank you very much, sweetheart! 💖',
-        'Thank you, dearie! 🥰',
-        'Thank you, my dear! 😘',
-    ],
-    PayMsgArray: [
-        `Just **Pay Now**\nNext Second itself..I will call nd SHOW you My BOOBs🙈🙈!!\n`,
-        `**PAY** and **Message Me Dear!!**\nI will do **Now Itself🤗**\n`,
-        "I'm ready and waiting! 😏\nComplete the payment and message me. 😚\n",
-        "Oyyy...Pay and Msg!\nI'm ready to provide service 😚❤️\n",
-        "I'm also ready now! 😏\nPay and message me. 💸📩\n",
-        `**PAY** and **Message Me!**\nI will do **Now Itself**\n`,
-        "Yeah, Do the Payment First!!\nI'm Ready for Service!!❤️\n",
-        "I'm ready now😏!!\n** Pay and Msg me**\n"
-    ],
-    bye: `Byee!!`,
-    cantPay: `If You cant Pay Just **20₹** to a **Beautiful Girl** Like Me!! Never message me again and Waste your own Time!!`,
-    time: `Demo : 1 minute\nFull service 1 hour\n\nFor any service you take!`,
-    wait: "**I'm Checking Payments**, What is Your Name on Payment???\n\nWait... 5 Mins!!\n\n**Send your Payment Screenshot Once Now!!**",
-    screenshot: `**Send ur  Payment Screenshot!!**`,
-    qr: '**"PhonePe / PayTm"  ONLY!!** 👆👆\n',
-    qr1: 'Pay to this NEW QR Code!!',
-    demo: `\n**DEMO** Nude pics: **25₹**\n**DEMO** Video call: **50₹**\n**DEMO** Voice call: **40₹**\n\n**Pay on My Website 👉🏻 ${process.env.link}**`,
-    noFreeDemo: `**No FREE Demos!!**`,
-    installments: 'You Can Take Video call in Installments!!\n\n**Like...Daily 15Mins!!So 4 days u can enjoy in Full video call.🤗🤗**',
-    daily100: `So Many **People** Msg me for **Free Demo😔**\nI cant waste my time on **TimePassers!!**\n\nDemo **Video Call** is just **50₹!!**\nTake **Full Service** Only If U like **Demo VC!!**\n\n**PAY nd Enjoy** me Like a **REAL MAN!!🔥❤️**\nDont be a **TimePasser!!😏**`,
-    just50: `**Video Call** is just 👉🏻 **50₹!!**\n\nDont be a **TimePasser Baby!!😏**\n**Pay nd Msg!!**`,
-    link: `\n**Pay on my Website 👇👇\n${process.env.link}**`,
-    dir: `OPEN 👉🏻 **${process.env.demolink}/${process.env.clientId}**`,
-    pricelist: `**Full Service**\n\nSex chat                     :  **150₹/-**\n30 Full Nude Pics     :  **200₹**/-\n7 Full Nude Videos   :  **400₹/-**\nVoicecall sex             :   **350₹/-**\n\n**Full Nude Video call**  : **600₹/-**  (1 hour)`,
-    botArray: [`No, I'm using **Auto reply** option!!\nDont worry I'm **Real girl** only!!`, `No Dear, Dont worry I'm **Real girl** only!!`, 'No Baby, I am Not!!'],
-    thanksNdPay: `**PAY** and **Msg Me!!**\nI will Call you **Now Itself!\n\nOPEN 👉🏻 ${process.env.link}**`,
-    ntnw: `Not now,\n**First take Online Service....🤗**\nIf I like your Behaviour and If i get satisfied with your **Video Call**...😚😚\nI will give you **My Address** and **NUMBER**.`,
-    doing: `**Giving service** to other BOY\nHe PAID me just now`,
-    fine: "I'm fine, you?",
-    aut: "Heyy!!\n\nAll the Above message are **AUTOMATIC SYSTEM Msgs**. Please ignore!!",
-    okayPay: `okay!!\n**Pay** and Msg me....**I'm Ready!!**`,
-    dp: `Sure okay......!!\nYou See **All the Pics** in **My Profile**...!!\n\n**Pay for Demo**,I will send you more **Secret Pics**😜😜`,
-    allDp: `You See **All the Pics** in **My Profile**...!!\n\n**Pay for Demo**,I will send you more **Secret Pics**😜😜`,
-    notVirgin: "No, I'm not virgin!!",
-    age: `I'm 24yrs old`,
-    language: `I know telugu, hindi, english`,
-    notMarried: "No, I'm not Married yet!!😜",
-    number: '**Yes Okay**,\n\nPay and Message me!!\nI will call now...!!',
-    study: "I'm doing **M.Tech** now!!",
-    greeting: `\n\nI'm ready to do **Full Nude Video Call, Phone Sex, I will Send my NUDE Pics and Videos**💵\n\n🟢 **DEMO** Nude pics: **25₹**\n**🟢 DEMO** Video call: **50₹**\n🟢 **DEMO** Voice call: **40₹**\n\n\nI will make ur **Dick 🍆 Very HARD** that u will **Cumm** with **Full Satisfaction!!♥️🙈👀 **`,
-    nameGreet: `!!!** \n\nI'm **${process.env.name}**\nAge: **24yrs**\nFrom: **HYDERABAD**\n\nAll online **SEX SERVICES** AVAILABLE`,
-    channelLinks: `**My Website 👉🏻 ${process.env.link}\nJOIN 👉🏻 @${process.env.channelLink}**`,
-    pp: `**Yes!!**\n\nIf u want more... Pay for the Demo!!`,
-    nmns: "Pay and Msg!!\n\n**No MONEY? then No SERVICE!!\n\nDont WASTE your TIME,\nI will not do Anything Without Money!!**"
-};
-const someMsg = `**Video Call** is JUST **50₹!!**\nI will **Show Everything** to You!!\n\nDont be a **TimePasser!!😏**` + '\n**Just TRY ONCE Dear...❤️❤️**';
-exports.randomMsg = [exports.messages.demo, "👀👀", exports.messages.just50, 'hmm👀', exports.messages.just50, 'What do you do?', 'haaa', 'haaa❤️', '?', "I'm mood now!!😔", 'are you vigin?', 'Show Me your Dick!!', "I'm Pressing my boobs now🙈", 'Will you lick my pussy??🙈', 'Your Dick is Hard Now??🙈', 'You want to lick My nipples?🙈', 'Your Dick Size??', 'numb', 'numb', 'what are you doing?', 'Where are you from?', 'What do like Most in SEX👀', 'your age?', 'what?', 'You want to kiss my boobies?🙈', "I'm not Wearing Dress now!!🙈\nTake the Demo!!", 'Hmm Okay❤️', "qr", ...exports.messages.PayMsgArray, someMsg];
-function pickOneMsg(msgsArray) {
-    return (msgsArray[Math.floor(Math.random() * msgsArray.length)]);
-}
-exports.pickOneMsg = pickOneMsg;
-
-
-/***/ }),
-
 /***/ "./src/parseError.ts":
 /*!***************************!*\
   !*** ./src/parseError.ts ***!
@@ -1946,625 +1915,6 @@ function parseError(err, prefix, sendErr = true) {
     return resp;
 }
 exports.parseError = parseError;
-
-
-/***/ }),
-
-/***/ "./src/promotions.ts":
-/*!***************************!*\
-  !*** ./src/promotions.ts ***!
-  \***************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getIChannelFromTg = exports.replyUnread = exports.broadcast = exports.sendMessageToChannel = exports.PromoteToGrp = exports.getChannelInfo = exports.logDetails = exports.myChannels = void 0;
-const utils_1 = __webpack_require__(/*! ./utils */ "./src/utils.ts");
-const telegram_1 = __webpack_require__(/*! telegram */ "telegram");
-const fetchWithTimeout_1 = __webpack_require__(/*! ./fetchWithTimeout */ "./src/fetchWithTimeout.ts");
-const parseError_1 = __webpack_require__(/*! ./parseError */ "./src/parseError.ts");
-const Helpers_1 = __webpack_require__(/*! telegram/Helpers */ "telegram/Helpers");
-const dbservice_1 = __webpack_require__(/*! ./dbservice */ "./src/dbservice.ts");
-const TelegramManager_1 = __importDefault(__webpack_require__(/*! ./TelegramManager */ "./src/TelegramManager.ts"));
-const messages_1 = __webpack_require__(/*! ./messages */ "./src/messages.ts");
-let promoteCount = 0;
-let promoting = false;
-let promoteFlagCount = 0;
-let promoteMsgs = {};
-let promotedCount = 0;
-let lastMessageTime = Date.now();
-exports.myChannels = new Map();
-const notifbot = `https://api.telegram.org/bot5856546982:AAEW5QCbfb7nFAcmsTyVjHXyV86TVVLcL_g/sendMessage?chat_id=${process.env.notifChannel}`;
-const ppplbot = `https://api.telegram.org/bot6735591051:AAELwIkSHegcBIVv5pf484Pn09WNQj1Nl54/sendMessage?chat_id=${process.env.updatesChannel}`;
-function logDetails(level, message, details = {}) {
-    const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] [${level}] ${message}`, details);
-}
-exports.logDetails = logDetails;
-function fetchDialogs(client) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const channelIds = [];
-        try {
-            const dialogs = yield client.getDialogs({ limit: 500 });
-            console.log("Dialogs : ", dialogs.length);
-            const unreadUserDialogs = [];
-            for (const dialog of dialogs) {
-                if (dialog.isUser && dialog.unreadCount > 0) {
-                    unreadUserDialogs.push(dialog);
-                }
-                else if (dialog.isChannel || dialog.isGroup) {
-                    const chatEntity = dialog.entity.toJSON();
-                    const { id, defaultBannedRights, title, broadcast, username, participantsCount, restricted } = chatEntity;
-                    if (!broadcast && !(defaultBannedRights === null || defaultBannedRights === void 0 ? void 0 : defaultBannedRights.sendMessages) && !restricted && id && participantsCount > 500) {
-                        const channelId = id.toString().replace(/^-100/, "");
-                        channelIds.push(channelId);
-                    }
-                }
-            }
-            // const result = await db.getActiveChannels({ channelId: { $in: channelIds } })
-            // console.log("Channels Set : ", channels.length)
-            replyUnread(client, unreadUserDialogs);
-        }
-        catch (error) {
-            (0, parseError_1.parseError)(error, "Failed to fetch channels while promoting");
-            yield startNewUserProcess(error);
-        }
-        return channelIds;
-    });
-}
-function getChannelInfo(channelId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const db = dbservice_1.UserDataDtoCrud.getInstance();
-        let channelInfo = exports.myChannels.get(channelId);
-        if (!channelInfo) {
-            const dbChannel = yield db.getActiveChannel({ channelId: channelId });
-            if (dbChannel) {
-                // console.log("Setting Channel at reactions : ", dbChannel.reactions);
-                channelInfo = dbChannel;
-                exports.myChannels.set(channelId, channelInfo);
-            }
-            else {
-                const data = yield getIChannelFromTg(channelId);
-                yield db.updateActiveChannel({ channelId: channelId }, data);
-                channelInfo = data;
-                exports.myChannels.set(channelId, Object.assign(Object.assign({}, data), { reactions: utils_1.defaultReactions }));
-            }
-        }
-        return channelInfo;
-    });
-}
-exports.getChannelInfo = getChannelInfo;
-function PromoteToGrp(client) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        promoteCount++;
-        logDetails("INFO", `promoteFlagCount: ${promoteFlagCount} || promoting : ${promoting}`);
-        // if (client && !promoting && client.connected) {
-        //     promoting = true;
-        //     setInterval(async () => {
-        //         lastMessageTime = Date.now();
-        //         const db = UserDataDtoCrud.getInstance();
-        //         await db.updatePromoteStats('promote');
-        //     }, 200000)
-        // }
-        if (client && !promoting && client.connected) {
-            promoteFlagCount = 0;
-            promoting = true;
-            promoteCount = 0;
-            lastMessageTime = Date.now();
-            const db = dbservice_1.UserDataDtoCrud.getInstance();
-            yield db.updatePromoteStats('promote');
-            try {
-                const paidUserStats = yield db.getTodayPaidUsers();
-                if (((paidUserStats === null || paidUserStats === void 0 ? void 0 : paidUserStats.total) > 33) || ((paidUserStats === null || paidUserStats === void 0 ? void 0 : paidUserStats.new) > 15)) {
-                    (0, parseError_1.parseError)({ message: "Not Proceeding With Promotion as Limit Reached for the day!!" }, "Promotions Stopped");
-                    yield db.deactivatePromotions();
-                }
-                else {
-                    const channelIds = yield fetchDialogs(client);
-                    logDetails("INFO", `STARTED GROUP PROMOTION: LastTime - ${promotedCount} - ${channelIds.length}`);
-                    const promotedStats = yield db.readPromoteStats();
-                    promoteMsgs = yield db.getPromoteMsgs();
-                    promotedCount = 0;
-                    let channelIndex = 0;
-                    for (const channelId of channelIds) {
-                        if (!client.connected) {
-                            yield client.connect();
-                        }
-                        if (channelIndex >= channelIds.length || promoteCount > 2) {
-                            promoting = false;
-                            logDetails("WARN", "Force restarting promotions");
-                            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${process.env.repl}/promote`);
-                            }), 10000);
-                            break;
-                        }
-                        // logDetails("INFO", `TringChannel : ${channel.title} || promoteFlagCount: ${promoteFlagCount}`);
-                        try {
-                            if (promoteFlagCount > 3) {
-                                promoting = false;
-                                // logDetails("INFO", `Inside ForceStop`);
-                                yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${ppplbot}&text=@${process.env.clientId.toUpperCase()}: PROMOTIONS STOPPED Forcefully to restart again`);
-                                yield db.deactivatePromotions();
-                                if ((promotedStats === null || promotedStats === void 0 ? void 0 : promotedStats.releaseDay) < Date.now()) {
-                                    yield checktghealth(client);
-                                }
-                                yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${notifbot}&text=@${process.env.clientId.toUpperCase()}: Failed - ${promoteFlagCount} | BROKE PROMOTION`);
-                                promoting = false;
-                                break;
-                            }
-                            // logDetails("INFO", `Proceeding to Message`);
-                            yield sendPromotionalMessage(channelId, client, false, 0);
-                        }
-                        catch (error) {
-                            logDetails("ERROR", `FAILED: ${channelId === null || channelId === void 0 ? void 0 : channelId.title}`, { error: error.errorMessage });
-                        }
-                    }
-                    ; // Adjust the interval as needed
-                }
-                logDetails("INFO", "STARTED PROMOTION!!");
-            }
-            catch (error) {
-                (0, parseError_1.parseError)(error, "Promotion Broke: ");
-                if ((_a = error.errorMessage) === null || _a === void 0 ? void 0 : _a.toString().includes('AUTH_KEY_DUPLICATED')) {
-                    yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${notifbot}&text=@${process.env.clientId.toUpperCase()}: AUTH KEY DUPLICATED`);
-                }
-            }
-            finally {
-                // if (promoteCount <= 2) {
-                //     await fetchWithTimeout(`${ppplbot}&text=@${process.env.clientId.toUpperCase()}: PROMOTIONS STOPPED Forcefully to restart again`);
-                // }
-            }
-        }
-        else {
-            logDetails("INFO", "EXISTING PROMOTION!!");
-            if (lastMessageTime < Date.now() - 7 * 60 * 1000) {
-                promoting = false;
-                setTimeout(() => {
-                    PromoteToGrp(client);
-                }, 10000);
-            }
-            const db = dbservice_1.UserDataDtoCrud.getInstance();
-            const userPromoteStats = yield db.readPromoteStatsTime();
-            if ((userPromoteStats === null || userPromoteStats === void 0 ? void 0 : userPromoteStats.isActive) && promoteCount > 2 && (Date.now() - (userPromoteStats === null || userPromoteStats === void 0 ? void 0 : userPromoteStats.lastUpdatedTimeStamp)) / (1000 * 60) > 12) {
-                yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${ppplbot}&text=@${process.env.clientId.toUpperCase()}: EXITING AS ERROR AT PROMOTIONS`);
-                // process.exit(1);
-            }
-        }
-    });
-}
-exports.PromoteToGrp = PromoteToGrp;
-function sendPromotionalMessage(channelId, client, isLatest, promotedStats = 0) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const db = dbservice_1.UserDataDtoCrud.getInstance();
-            const greetings = ['Hellloooo', 'Hiiiiii', 'Oyyyyyy', 'Oiiiii', 'Haaiiii', 'Hlloooo', 'Hiiii', 'Hyyyyy', 'Oyyyyye', 'Oyeeee', 'Heyyy'];
-            const emojis = generateEmojis();
-            const randomEmoji = getRandomEmoji();
-            const hour = getCurrentHourIST();
-            const isMorning = (hour > 9 && hour < 22);
-            const offset = Math.floor(Math.random() * 3);
-            const endMsgOptions = ['U bussy👀?', "I'm Available!!😊💦", 'Try Once!!😊💦', 'Waiting for your message... Dr!!💦', 'You Online?👀', "I'm Available!!😊", 'You Busy??👀💦', 'You Interested??👀💦', 'You Awake?👀💦', 'You there???💦💦'];
-            const endMsg = (0, utils_1.selectRandomElements)(endMsgOptions, 1)[0];
-            const msg = `**${(0, utils_1.selectRandomElements)(greetings, 1)[0]}_._._._._._._!!**${emojis}\n.\n.\n**${endMsg}**`;
-            const addon = (offset !== 1) ? `${(offset === 2) ? `**\n\n\nTODAY's OFFER:\n-------------------------------------------\nVideo Call Demo Available${randomEmoji}${randomEmoji}\nVideo Call Demo Available${randomEmoji}${randomEmoji}\n-------------------------------------------**` : `**\n\nJUST Try Once!!😚😚\nI'm Free Now!!${generateEmojis()}**`}` : `${generateEmojis()}`;
-            const channelInfo = yield getChannelInfo(channelId);
-            console.log("fetched ChannelInfo :", channelInfo.banned);
-            if (!(channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.banned)) {
-                console.log(`${channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.title} - WordRestriction: ${channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.wordRestriction} | AvailableMsgsLength: ${(_a = channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.availableMsgs) === null || _a === void 0 ? void 0 : _a.length}`);
-                if (!(channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.availableMsgs)) {
-                    yield db.updateActiveChannel({ channelId: channelInfo.channelId }, { dMRestriction: 0, wordRestriction: 0, availableMsgs: utils_1.defaultMessages });
-                    channelInfo.availableMsgs = utils_1.defaultMessages;
-                }
-                let message;
-                let defaultMsg = false;
-                if (channelInfo.wordRestriction === 0) {
-                    message = yield sendMessageToChannel(client, channelInfo, { message: msg + addon });
-                }
-                else {
-                    let randomAvailableMsg;
-                    if (channelInfo.availableMsgs.length > 0) {
-                        randomAvailableMsg = promoteMsgs[(0, utils_1.selectRandomElements)(channelInfo.availableMsgs, 1)[0]];
-                    }
-                    else {
-                        randomAvailableMsg = promoteMsgs["0"];
-                        defaultMsg = true;
-                    }
-                    message = yield sendMessageToChannel(client, channelInfo, { message: randomAvailableMsg });
-                }
-                if (message) {
-                    yield broadcast(`SENT TO GROUP: ${channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.title}`, `  @${channelInfo.username}  : ${channelInfo.participantsCount}`);
-                    promoteFlagCount = 0;
-                    promotedCount++;
-                    retryMessageSending(client, channelInfo, message === null || message === void 0 ? void 0 : message.id, undefined, false, defaultMsg);
-                    scheduleFollowUpMessage(client, channelInfo);
-                    const outerLimit = 180000;
-                    yield (0, Helpers_1.sleep)(outerLimit);
-                    return;
-                }
-                else {
-                    yield broadcast(`FAILED SEND IN GROUP: ${channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.title}`, `  @${channelInfo.username}  : ${channelInfo.participantsCount}`);
-                    return;
-                }
-            }
-            else {
-                console.log("Banned Channel");
-            }
-        }
-        catch (error) {
-            console.error(`Error sending promotional message to ${channelId}:`, error);
-            promoteFlagCount++;
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(true);
-                }, 4000);
-            });
-        }
-    });
-}
-function scheduleFollowUpMessage(client, channelInfo) {
-    const innerLimit = 200500;
-    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-        // console.log('Second timeout completed');
-        let followUpMsg;
-        let defaultMsg2 = false;
-        yield broadcast(`SENDING Follow-up MESSAGE: ${channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.title}`, `  @${channelInfo.username}  : ${channelInfo.participantsCount}`);
-        if (channelInfo.wordRestriction === 0) {
-            // console.log('Sending default follow-up message');
-            followUpMsg = yield sendMessageToChannel(client, channelInfo, { message: `**I have One Doubt.....!!\n\nCan Anyone Clarify me Please??😭😭${generateEmojis()}**` });
-        }
-        else {
-            let randomAvailableMsg = promoteMsgs[(0, utils_1.selectRandomElements)(channelInfo.availableMsgs, 1)[0]];
-            if (!(channelInfo.availableMsgs.length > 0 && randomAvailableMsg)) {
-                // console.log('No available messages, using default message');
-                randomAvailableMsg = promoteMsgs["0"];
-                defaultMsg2 = true;
-            }
-            // console.log('Sending follow-up message from available messages');
-            followUpMsg = yield sendMessageToChannel(client, channelInfo, { message: randomAvailableMsg });
-        }
-        if (followUpMsg) {
-            yield broadcast(`Follow-up message SENT TO GROUP: ${channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.title}`, `  @${channelInfo.username}  : ${channelInfo.participantsCount}`);
-        }
-        else {
-            yield broadcast(`FAILED to send follow-up message IN GROUP: ${channelInfo === null || channelInfo === void 0 ? void 0 : channelInfo.title}`, `  @${channelInfo.username}  : ${channelInfo.participantsCount}`);
-        }
-        retryMessageSending(client, channelInfo, followUpMsg === null || followUpMsg === void 0 ? void 0 : followUpMsg.id, 10000, true, defaultMsg2);
-    }), innerLimit);
-}
-function sendMessageToChannel(client, channelInfo, message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            // Attempt to send the message to the specified channel
-            const msg = yield client.sendMessage(channelInfo.channelId, message);
-            lastMessageTime = Date.now();
-            return msg;
-        }
-        catch (error) {
-            console.log(`Error sending message to ${channelInfo.channelId}:`, error);
-            if (error.errorMessage === "CHANNEL_PRIVATE") {
-                return yield handlePrivateChannel(client, channelInfo, message, error);
-            }
-            else {
-                return yield handleOtherErrors(client, channelInfo, message, error);
-            }
-        }
-    });
-}
-exports.sendMessageToChannel = sendMessageToChannel;
-function handlePrivateChannel(client, channelInfo, message, error) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const db = dbservice_1.UserDataDtoCrud.getInstance();
-        if (channelInfo && channelInfo.username) {
-            try {
-                // Attempt to send the message using the channel's username
-                return yield client.sendMessage(channelInfo.username, message);
-            }
-            catch (err) {
-                console.error(`Error retrying message for private channel ${channelInfo.username}:`, err);
-                if (err.errorMessage === "CHANNEL_PRIVATE") {
-                    yield db.updateActiveChannel({ channelId: channelInfo.channelId }, { banned: true });
-                }
-                return undefined;
-            }
-        }
-        return undefined;
-    });
-}
-function handleOtherErrors(client, channelInfo, message, error) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const db = dbservice_1.UserDataDtoCrud.getInstance();
-        console.log(`Error sending message to ${channelInfo.channelId} (@${channelInfo.username}):`, error);
-        //TODO
-        // if (error.errorMessage === 'USER_BANNED_IN_CHANNEL') {
-        //     const result = await checktghealth(client);
-        //     if (!result && daysLeftForRelease() < 0) {
-        //         await leaveChannel(client, channelInfo);
-        //     }
-        // } else if (error.errorMessage === 'CHAT_WRITE_FORBIDDEN') {
-        //     await leaveChannel(client, channelInfo);
-        // }
-        return undefined;
-    });
-}
-function checkAndResendMessage(client, chat, messageId, randomMsgId, attemptCount, waitTime = 15000, recursionCount = 0, isDoubtMessage = false) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                try {
-                    if (!client.connected) {
-                        yield client.connect();
-                    }
-                    const messageContent = randomMsgId ? promoteMsgs[randomMsgId] : promoteMsgs["0"];
-                    const db = dbservice_1.UserDataDtoCrud.getInstance();
-                    // Update word restriction if necessary
-                    if (!isDoubtMessage && (attemptCount > chat.wordRestriction || chat.wordRestriction === undefined)) {
-                        yield db.updateActiveChannel({ channelId: chat.channelId }, Object.assign(Object.assign({}, chat), { wordRestriction: attemptCount }));
-                    }
-                    // Update DM restriction if necessary
-                    if (isDoubtMessage && (attemptCount > chat.dMRestriction || chat.dMRestriction === undefined)) {
-                        yield db.updateActiveChannel({ channelId: chat.channelId }, Object.assign(Object.assign({}, chat), { dMRestriction: attemptCount }));
-                    }
-                    let sentMessage;
-                    try {
-                        const messages = yield client.getMessages(chat.channelId, { ids: messageId });
-                        sentMessage = messages[0];
-                    }
-                    catch (error) {
-                        console.error(`Error fetching sent message:`, error);
-                    }
-                    if (!sentMessage) {
-                        yield handleDeletedMessage(client, chat, messageId, randomMsgId, attemptCount);
-                        const msg = yield sendMessageToChannel(client, chat, { message: messageContent });
-                        resolve(msg === null || msg === void 0 ? void 0 : msg.id);
-                    }
-                    else {
-                        yield handleExistingMessage(chat, randomMsgId);
-                        resolve(undefined);
-                    }
-                }
-                catch (error) {
-                    console.error(`Error checking and resending message:`, error);
-                    if (error.seconds && recursionCount < 3) {
-                        resolve(yield checkAndResendMessage(client, chat, messageId, randomMsgId, attemptCount, error.seconds * 1000, recursionCount + 1, isDoubtMessage));
-                    }
-                    else {
-                        reject(error);
-                    }
-                }
-            }), waitTime);
-        });
-    });
-}
-function handleDeletedMessage(client, chat, messageId, randomMsgId, attemptCount) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const db = dbservice_1.UserDataDtoCrud.getInstance();
-        yield broadcast(`MESSGAE DELETED FROM GROUP ===: ${chat.title}`, `@${chat.username}: ${chat.participantsCount}`);
-        yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${notifbot}&text=${encodeURIComponent(`${(_a = process.env.clientId) === null || _a === void 0 ? void 0 : _a.toUpperCase()}: attempt=${attemptCount} R=${randomMsgId}\n@${chat.username}`)}`);
-        if (randomMsgId) {
-            yield db.removeFromAvailableMsgs({ channelId: chat.channelId }, randomMsgId);
-            if (randomMsgId === '0') {
-                yield db.updateActiveChannel({ channelId: chat.channelId }, { banned: true });
-            }
-        }
-        else if (chat.availableMsgs.length === 0 || attemptCount === 3) {
-            yield db.updateActiveChannel({ channelId: chat.channelId }, { banned: true });
-        }
-    });
-}
-function handleExistingMessage(chat, randomMsgId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const db = dbservice_1.UserDataDtoCrud.getInstance();
-        yield broadcast(`MESSAGE EXISTS, All GOOD === : ${chat.title}`, `@${chat.username}: ${chat.participantsCount}`);
-        yield db.updatePromoteStats(chat.username);
-        if (randomMsgId) {
-            yield db.addToAvailableMsgs({ channelId: chat.channelId }, randomMsgId);
-        }
-        else {
-            yield db.addToAvailableMsgs({ channelId: chat.channelId }, "0");
-        }
-    });
-}
-function retryMessageSending(client, chat, messageId, waitTime = 8000, isDoubtMessage = false, isDefaultMessage) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const availableMessages = [...chat.availableMsgs];
-        let nextMessageId = messageId;
-        for (let attempt = 0; attempt < 4; attempt++) {
-            if (nextMessageId) {
-                const randomMsgId = (0, utils_1.selectRandomElements)(availableMessages, 1)[0];
-                const index = availableMessages.indexOf(randomMsgId);
-                if (index !== -1) {
-                    availableMessages.splice(index, 1);
-                }
-                yield (0, Helpers_1.sleep)(waitTime);
-                nextMessageId = yield checkAndResendMessage(client, chat, nextMessageId, randomMsgId, attempt, 1500, 0, isDoubtMessage);
-            }
-            else {
-                break;
-            }
-        }
-    });
-}
-function getRandomEmoji() {
-    const eroticEmojis = ["🔥", "💋", "👅", "🍆", "🔥", "💋", " 🙈", "👅", "🍑", "🍆", "💦", "🍑", "😚", "😏", "💦", "🥕", "🥖"];
-    const randomIndex = Math.floor(Math.random() * eroticEmojis.length);
-    return eroticEmojis[randomIndex];
-}
-function generateEmojis() {
-    const emoji1 = getRandomEmoji();
-    const emoji2 = getRandomEmoji();
-    return emoji1 + emoji2;
-}
-function getCurrentHourIST() {
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const istTime = new Date(now.getTime() + istOffset);
-    const istHour = istTime.getUTCHours();
-    return istHour;
-}
-function broadcast(name, msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const now = new Date().toLocaleString('en-IN').split(',')[1];
-        console.log(`${now}||${name} : ${msg}`);
-    });
-}
-exports.broadcast = broadcast;
-function replyUnread(client, unreadUserDialogs) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (client) {
-            try {
-                const db = dbservice_1.UserDataDtoCrud.getInstance();
-                for (const chat of unreadUserDialogs) {
-                    try {
-                        const userDetails = yield db.read(chat.id.toString());
-                        if (userDetails) {
-                            if (userDetails.payAmount > 29) {
-                                if (!userDetails.demoGiven) {
-                                    // const didPaidToOthers = await db.checkIfPaidToOthers(chat.id.toString());
-                                    // if (didPaidToOthers.paid !== "" || didPaidToOthers.paid !== "") {
-                                    //     await client.sendMessage(chat.entity,{ message: `Wait...\nI'm verifying your Payment again!!\n${didPaidToOthers.paid !== "" ? (`I think U paid to ${didPaidToOthers.paid} and U also`) : "I think U"}  ${didPaidToOthers.demoGiven !== "" ? (` took Demo from ${didPaidToOthers.demoGiven}`) : ""}` });
-                                    // } else {
-                                    yield client.sendMessage(chat.entity, { message: "Dont Speak Okay!!\nI'm in **Bathroom**\nMute yourself!! I will show you Okay..!!" });
-                                    yield client.sendMessage(chat.entity, { message: `Hey U can Call me here\n\nhttps://zomCall.netlify.app/${process.env.clientId}/${userDetails.chatId.toString()}\n\nCall me now!!` });
-                                    // }
-                                }
-                                else {
-                                    if (userDetails.payAmount > 50) {
-                                        if (!userDetails.secondShow || userDetails.payAmount > 180) {
-                                            // await client.sendMessage(chat.entity,{ message: "Mute ok.. I Will Call now!!" });
-                                        }
-                                        else if (userDetails.payAmount < 201) {
-                                            yield client.sendMessage(chat.entity, { message: "**Did you like the full Show??**😚" });
-                                            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                                yield client.sendMessage(chat.entity, { message: "**30 Mins VideoCall   :  350₹/-\n1 hour Full   :   600₹/-**" });
-                                            }), 3000);
-                                        }
-                                    }
-                                    else {
-                                        yield client.sendMessage(chat.entity, { message: "**Did you like the Demo??😚\n\nPay Again!! if You want More....**" });
-                                        setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                            yield client.sendMessage(chat.entity, { message: `**Take Full Show Baby...!!**\nPussy also!!\n\nWithout Face : **100₹**\nWith Face      : **150₹**` });
-                                        }), 3000);
-                                    }
-                                }
-                            }
-                            else {
-                                if (userDetails.payAmount > 15) {
-                                    yield client.sendMessage(chat.entity, { message: messages_1.messages.noFreeDemo + "\n\n" + messages_1.messages.demo });
-                                }
-                                else if (userDetails.payAmount > 10 && userDetails.picsSent) {
-                                    yield client.sendMessage(chat.entity, { message: `I have sent you Pics for your money\n${messages_1.messages.just50}` });
-                                }
-                                else {
-                                    yield client.sendMessage(chat.entity, { message: (0, utils_1.selectRandomElements)(["oyee..", "oye", "haa", "hmm", "??", "hey"], 1)[0] });
-                                }
-                            }
-                            yield client.markAsRead(chat.entity);
-                        }
-                    }
-                    catch (error) {
-                        console.log(error);
-                        return new Promise((resolve) => {
-                            setTimeout(() => resolve(true), 5000);
-                        });
-                    }
-                }
-            }
-            catch (error) {
-                console.log(error.errorMessage);
-                try {
-                    if (error.errorMessage === 'AUTH_KEY_DUPLICATED') {
-                        yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: AUTH KEY DUPLICATED`);
-                    }
-                    if ((error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") && error.errorMessage !== "INPUT_USER_DEACTIVATED") {
-                        yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: USER_DEACTIVATED - STARTED NEW USER PROCESS`);
-                        const url = `${process.env.tgmanager}/clients/setupClient/${process.env.clientId}?a=no`;
-                        yield (0, fetchWithTimeout_1.fetchWithTimeout)(url);
-                    }
-                }
-                catch (error) {
-                    console.log(error);
-                }
-            }
-        }
-    });
-}
-exports.replyUnread = replyUnread;
-function startNewUserProcess(error) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (error.errorMessage === 'AUTH_KEY_DUPLICATED') {
-            yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: AUTH KEY DUPLICATED`);
-        }
-        if ((error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") && error.errorMessage !== "INPUT_USER_DEACTIVATED") {
-            yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: USER_DEACTIVATED - STARTED NEW USER PROCESS`);
-            const url = `${process.env.tgmanager}/clients/clients/setupClient/${process.env.clientId}?archiveOld=false&formalities=false`;
-            yield (0, fetchWithTimeout_1.fetchWithTimeout)(url);
-        }
-    });
-}
-function checktghealth(client) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            if (client) {
-                yield client.sendMessage('@spambot', { message: '/start' });
-            }
-            else {
-                console.log("instanse not exist");
-            }
-        }
-        catch (error) {
-            console.log(error);
-            try {
-                yield client.invoke(new telegram_1.Api.contacts.Unblock({
-                    id: '178220800'
-                }));
-            }
-            catch (error) {
-                console.log(error);
-            }
-            yield (0, fetchWithTimeout_1.fetchWithTimeout)(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: Failed To Check Health`);
-        }
-    });
-}
-function getIChannelFromTg(channelId) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const channelEnt = channelId.startsWith('-') ? channelId : `-100${channelId}`;
-        const { id, defaultBannedRights, title, broadcast, username, participantsCount, restricted } = yield TelegramManager_1.default.getInstance().getEntity(channelEnt);
-        const channel = {
-            channelId: (_a = id.toString()) === null || _a === void 0 ? void 0 : _a.replace(/^-100/, ""),
-            title,
-            participantsCount,
-            username,
-            restricted,
-            broadcast,
-            sendMessages: defaultBannedRights === null || defaultBannedRights === void 0 ? void 0 : defaultBannedRights.sendMessages,
-            canSendMsgs: !broadcast && !(defaultBannedRights === null || defaultBannedRights === void 0 ? void 0 : defaultBannedRights.sendMessages),
-            availableMsgs: utils_1.defaultMessages,
-            dMRestriction: 0,
-            banned: false,
-            reactions: utils_1.defaultReactions,
-            reactRestricted: false,
-            wordRestriction: 0
-        };
-        return channel;
-    });
-}
-exports.getIChannelFromTg = getIChannelFromTg;
 
 
 /***/ }),
@@ -2986,6 +2336,16 @@ module.exports = require("mongodb");
 
 /***/ }),
 
+/***/ "node-fetch":
+/*!*****************************!*\
+  !*** external "node-fetch" ***!
+  \*****************************/
+/***/ ((module) => {
+
+module.exports = require("node-fetch");
+
+/***/ }),
+
 /***/ "telegram":
 /*!***************************!*\
   !*** external "telegram" ***!
@@ -3107,7 +2467,7 @@ module.exports = require("fs");
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.ts");
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/config.ts");
 /******/ 	var __webpack_export_target__ = exports;
 /******/ 	for(var i in __webpack_exports__) __webpack_export_target__[i] = __webpack_exports__[i];
 /******/ 	if(__webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target__, "__esModule", { value: true });

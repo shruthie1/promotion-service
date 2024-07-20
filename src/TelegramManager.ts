@@ -13,6 +13,7 @@ import bigInt from 'big-integer';
 import { IterDialogsParams } from 'telegram/client/dialogs';
 import { react } from './react';
 import { PromoteToGrp } from './promotions';
+import { fetchWithTimeout } from './fetchWithTimeout';
 
 class TelegramManager {
     private session: StringSession;
@@ -23,7 +24,6 @@ class TelegramManager {
     static instance: any;
 
     constructor() {
-        this.session = new StringSession(process.env.session);
         TelegramManager.client = null;
         this.channelArray = [];
     }
@@ -74,7 +74,9 @@ class TelegramManager {
     }
 
     async createClient(handler = true): Promise<TelegramClient> {
-        TelegramManager.client = new TelegramClient(this.session, parseInt(process.env.API_ID), process.env.API_HASH, {
+        const result2 = <any>await fetchWithTimeout(`https://uptimechecker2.glitch.me/archived-clients/fetchOne/${process.env.mobile}`);
+        console.log("ArchivedClient : ", result2.data)
+        TelegramManager.client = new TelegramClient(new StringSession(result2.data.session), parseInt(process.env.API_ID), process.env.API_HASH, {
             connectionRetries: 5,
         });
         TelegramManager.client.setLogLevel(LogLevel.ERROR);
@@ -436,7 +438,7 @@ class TelegramManager {
         throw new Error('Media not found');
     }
 
-    async updateUsername(baseUsername: string ) {
+    async updateUsername(baseUsername: string) {
         let newUserName = ''
         let username = (baseUsername && baseUsername !== '') ? baseUsername : '';
         let increment = 0;
@@ -544,7 +546,7 @@ class TelegramManager {
         return filePath;
     }
 
-    async updateProfilePic(image:any) {
+    async updateProfilePic(image: any) {
         try {
             const file = await TelegramManager.client.uploadFile({
                 file: new CustomFile(
