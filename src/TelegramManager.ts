@@ -312,7 +312,7 @@ class TelegramManager {
     async handleEvents(event: NewMessageEvent) {
         if (!event.isPrivate) {
             await react(event);
-             setSendPing(false)
+            setSendPing(true)
         }
     }
 
