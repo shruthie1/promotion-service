@@ -5,7 +5,9 @@ import TelegramManager from './TelegramManager';
 import { parseError } from './parseError';
 import { sendPing } from './connection';
 import { ppplbot } from './utils';
+import * as schedule from 'node-schedule-tz';
 import { getReactSleepTime, getLastReactTime, getAverageReactionDelay, getTotalReactions, getTotalFloodcount, getMinWaitTime, getTargetReactionDelay } from './react';
+import { getClient } from './clients.service';
 
 let canTry2 = true;
 
@@ -44,6 +46,19 @@ process.on('uncaughtException', async (err) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
+
+schedule.scheduleJob('test3', '*/10 * * * *', 'Asia/Kolkata', async () => {
+  const client = await getClient(process.env.clientId);
+  if (client) {
+    const me = await TelegramManager.client?.getMe();
+    if (me && client.mobile !== me.phone) {
+      console.log("Exitting as Clients Changed")
+      process.exit(1);
+    } else {
+      console.log("All Good as Client")
+    }
+  }
+})
 
 const app = express();
 const port = process.env.PORT || 3000;
