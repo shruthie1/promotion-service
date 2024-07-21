@@ -52,7 +52,7 @@ export async function fetchWithTimeout(resource: string, options: AxiosRequestCo
                 } else {
                     console.log(`All ${maxRetries + 1} retries failed for ${resource}`);
                     if (sendErr) {
-                        axios.get(`${ppplbot()}&text=${encodeURIComponent(`HELPER :: All ${maxRetries + 1} retries failed for ${resource}\n${errorDetails.message}`)}`)
+                        axios.get(`${ppplbot()}&text=${encodeURIComponent(`${process.env.clientId}-Prom :: All ${maxRetries + 1} retries failed for ${resource}\n${errorDetails.message}`)}`)
                     }
                     return undefined;
                 }
