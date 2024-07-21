@@ -7,6 +7,35 @@ import { parseError } from "./parseError";
 import { ReactQueue } from "./ReactQueue";
 import { contains, ppplbot } from "./utils";
 
+export function getReactSleepTime() {
+    return reactSleepTime;
+}
+
+export function getLastReactTime() {
+    return lastReactedtime;
+}
+
+export function getAverageReactionDelay() {
+    return Math.floor(averageReactionDelay);
+}
+
+export function getTotalReactions() {
+    return Math.floor(successfulReactions);
+}
+
+export function getTotalFloodcount() {
+    return floodCount;
+}
+
+export function getMinWaitTime() {
+    return minWaitTime;
+}
+
+export function getTargetReactionDelay() {
+    return targetReactionDelay;
+}
+
+
 const standardEmoticons = ['👍', '❤', '🔥', '👏', '🥰', '😁']
 const emoticons = [
     '❤', '🔥', '👏', '🥰', '😁', '🤔',

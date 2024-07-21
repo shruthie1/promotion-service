@@ -5,6 +5,7 @@ import TelegramManager from './TelegramManager';
 import { parseError } from './parseError';
 import { sendPing } from './connection';
 import { ppplbot } from './utils';
+import { getReactSleepTime, getLastReactTime, getAverageReactionDelay, getTotalReactions, getTotalFloodcount, getMinWaitTime, getTargetReactionDelay } from './react';
 
 let canTry2 = true;
 
@@ -141,6 +142,12 @@ app.get('/exitPrimary', (req, res, next) => {
       await sleep(40000);
     }
   }
+});
+
+
+app.get('/reactionDetails', async (req, res) => {
+  await fetchWithTimeout(`${ppplbot}&text=${encodeURIComponent(`${(process.env.clientId).toUpperCase()}\nPresentSleepTime : ${getReactSleepTime()}\nLastReacted : ${Math.floor((Date.now() - getLastReactTime()) / 1000)}\nAverage: ${getAverageReactionDelay()}\nTotal: ${getTotalReactions()}\nfloodcount : ${getTotalFloodcount()}\nminWaitTime: ${getMinWaitTime()}\ntarget: ${getTargetReactionDelay()}`)}`);
+  res.send('ok')
 });
 
 
