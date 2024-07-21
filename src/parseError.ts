@@ -1,5 +1,5 @@
 import { fetchWithTimeout } from "./fetchWithTimeout";
-const notifbot = `https://api.telegram.org/bot5856546982:AAEW5QCbfb7nFAcmsTyVjHXyV86TVVLcL_g/sendMessage?chat_id=${process.env.notifChannel}`
+const notifbot = `https://api.telegram.org/bot5856546982:AAEW5QCbfb7nFAcmsTyVjHXyV86TVVLcL_g/sendMessage?chat_id=-1001823103248`
 
 export function parseError(
     err: any,

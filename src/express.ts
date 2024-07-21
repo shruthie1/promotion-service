@@ -4,9 +4,45 @@ import { UserDataDtoCrud } from './dbservice';
 import TelegramManager from './TelegramManager';
 import { parseError } from './parseError';
 import { sendPing } from './connection';
+import { ppplbot } from './utils';
 
 let canTry2 = true;
-const ppplbot = `https://api.telegram.org/bot6735591051:AAELwIkSHegcBIVv5pf484Pn09WNQj1Nl54/sendMessage?chat_id=${process.env.updatesChannel}`;
+
+async function exitHandler(options, exitCode) {
+  await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}:ExitHandler | pid - ${process.pid} | code - ${exitCode}| options: ${JSON.stringify(options)}`);
+  if (options.cleanup) await (UserDataDtoCrud.getInstance()).closeConnection();
+  if (exitCode || exitCode === 0) console.log("exitCode: ", exitCode);
+  if (options.exit) process.exit();
+}
+
+// do something when app is closing
+process.on('exit', exitHandler.bind(null, { cleanup: true }));
+process.on('SIGINT', exitHandler.bind(null, {}));
+process.on('SIGQUIT', exitHandler.bind(null, {}));
+process.on('SIGHUP', exitHandler.bind(null, {}));
+process.on('SIGUSR1', exitHandler.bind(null, {}));
+process.on('SIGUSR2', exitHandler.bind(null, {}));
+process.on('SIGTERM', exitHandler.bind(null, { exit: true }));
+
+process.on('uncaughtException', async (err) => {
+  console.log('------------An uncaught exception occurred:', err);
+  try {
+      await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: UNCAUGHT - ${err}`);
+      if (JSON.stringify(err).includes('MongoPoolClearedError')) {
+          await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()} - Restarting DB`);
+          await (UserDataDtoCrud.getInstance()).closeConnection();
+          setTimeout(() => {
+              UserDataDtoCrud.getInstance().connect()
+          }, 15000);
+      }
+  } catch (error) {
+      console.log(error)
+  }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -77,7 +113,7 @@ app.get('/tryToConnect/:num', async (req, res, next) => {
       }
       else {
         console.log('SomeOther Unknown Process Exist');
-        await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: SomeOther Unknown Process Exist`);
+        await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}: SomeOther Unknown Process Exist`);
       }
     }
   } catch (error) {
