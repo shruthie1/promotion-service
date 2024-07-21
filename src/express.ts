@@ -10,7 +10,7 @@ import { getReactSleepTime, getLastReactTime, getAverageReactionDelay, getTotalR
 let canTry2 = true;
 
 async function exitHandler(options, exitCode) {
-  await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}:ExitHandler | pid - ${process.pid} | code - ${exitCode}| options: ${JSON.stringify(options)}`);
+  await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}:ExitHandler | pid - ${process.pid} | code - ${exitCode}| options: ${JSON.stringify(options)}`);
   // if (options.cleanup) await (UserDataDtoCrud.getInstance()).closeConnection();
   if (exitCode || exitCode === 0) console.log("exitCode: ", exitCode);
   if (options.exit) process.exit();
@@ -28,9 +28,9 @@ process.on('SIGTERM', exitHandler.bind(null, { exit: true }));
 process.on('uncaughtException', async (err) => {
   console.log('------------An uncaught exception occurred:', err);
   try {
-    await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: UNCAUGHT - ${err}`);
+    await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}: UNCAUGHT - ${err}`);
     if (JSON.stringify(err).includes('MongoPoolClearedError')) {
-      await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()} - Restarting DB`);
+      await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()} - Restarting DB`);
       // await (UserDataDtoCrud.getInstance()).closeConnection();
       setTimeout(() => {
         // UserDataDtoCrud.getInstance().connect()
@@ -82,7 +82,7 @@ app.get('/tryToConnect/:num', async (req, res, next) => {
   try {
     if (canTry2) {
       if (receivePrcssId === prcessID) {
-        // const isAlive = await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: Alive Check`);
+        // const isAlive = await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}: Alive Check`);
         // if (isAlive) {
         await sleep(300);
         if (sendPing === false) {
@@ -93,20 +93,20 @@ app.get('/tryToConnect/:num', async (req, res, next) => {
           }, 70000);
           let canStart = true
           for (let i = 0; i < 3; i++) {
-            // const resp = await fetchWithTimeout(`${ppplbot}&text=exit${process.env.username}`);
+            // const resp = await fetchWithTimeout(`${ppplbot()}&text=exit${process.env.username}`);
             // if (resp) {
             //   canStart = true;
             //   break;
             // }
           }
           await sleep(3000);
-          // await fetchWithTimeout(`${ppplbot}&text=exit${process.env.username}`);
+          // await fetchWithTimeout(`${ppplbot()}&text=exit${process.env.username}`);
           if (canStart) {
-            // await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: Connecting.......!!`);
+            // await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}: Connecting.......!!`);
             await startConn();
           }
           // } else {
-          //     await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: Pinging is Working`);
+          //     await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}: Pinging is Working`);
           // }
         } else {
           console.log('Issue at sending Pings')
@@ -146,7 +146,7 @@ app.get('/exitPrimary', (req, res, next) => {
 
 
 app.get('/reactionDetails', async (req, res) => {
-  await fetchWithTimeout(`${ppplbot}&text=${encodeURIComponent(`${(process.env.clientId).toUpperCase()}\nPresentSleepTime : ${getReactSleepTime()}\nLastReacted : ${Math.floor((Date.now() - getLastReactTime()) / 1000)}\nAverage: ${getAverageReactionDelay()}\nTotal: ${getTotalReactions()}\nfloodcount : ${getTotalFloodcount()}\nminWaitTime: ${getMinWaitTime()}\ntarget: ${getTargetReactionDelay()}`)}`);
+  await fetchWithTimeout(`${ppplbot()}&text=${encodeURIComponent(`${(process.env.clientId).toUpperCase()}\nPresentSleepTime : ${getReactSleepTime()}\nLastReacted : ${Math.floor((Date.now() - getLastReactTime()) / 1000)}\nAverage: ${getAverageReactionDelay()}\nTotal: ${getTotalReactions()}\nfloodcount : ${getTotalFloodcount()}\nminWaitTime: ${getMinWaitTime()}\ntarget: ${getTargetReactionDelay()}`)}`);
   res.send('ok')
 });
 

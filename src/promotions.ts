@@ -149,7 +149,7 @@ export interface IChannel {
 //                         if (promoteFlagCount > 3) {
 //                             promoting = false;
 //                             // logDetails("INFO", `Inside ForceStop`);
-//                             await fetchWithTimeout(`${ppplbot}&text=@${process.env.clientId.toUpperCase()}: PROMOTIONS STOPPED Forcefully to restart again`);
+//                             await fetchWithTimeout(`${ppplbot()}&text=@${process.env.clientId.toUpperCase()}: PROMOTIONS STOPPED Forcefully to restart again`);
 //                             await db.deactivatePromotions();
 //                             if (promotedStats?.releaseDay < Date.now()) {
 //                                 await checktghealth(client);
@@ -174,7 +174,7 @@ export interface IChannel {
 //         }
 //         finally {
 //             // if (promoteCount <= 2) {
-//             //     await fetchWithTimeout(`${ppplbot}&text=@${process.env.clientId.toUpperCase()}: PROMOTIONS STOPPED Forcefully to restart again`);
+//             //     await fetchWithTimeout(`${ppplbot()}&text=@${process.env.clientId.toUpperCase()}: PROMOTIONS STOPPED Forcefully to restart again`);
 //             // }
 //         }
 //     } else {
@@ -188,7 +188,7 @@ export interface IChannel {
 //         const db = UserDataDtoCrud.getInstance();
 //         const userPromoteStats = await db.readPromoteStatsTime();
 //         if (userPromoteStats?.isActive && promoteCount > 2 && (Date.now() - userPromoteStats?.lastUpdatedTimeStamp) / (1000 * 60) > 12) {
-//             await fetchWithTimeout(`${ppplbot}&text=@${process.env.clientId.toUpperCase()}: EXITING AS ERROR AT PROMOTIONS`);
+//             await fetchWithTimeout(`${ppplbot()}&text=@${process.env.clientId.toUpperCase()}: EXITING AS ERROR AT PROMOTIONS`);
 //             // process.exit(1);
 //         }
 //     }
@@ -522,10 +522,10 @@ export interface IChannel {
 //             console.log(error.errorMessage);
 //             try {
 //                 if (error.errorMessage === 'AUTH_KEY_DUPLICATED') {
-//                     await fetchWithTimeout(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: AUTH KEY DUPLICATED`);
+//                     await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}: AUTH KEY DUPLICATED`);
 //                 }
 //                 if ((error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") && error.errorMessage !== "INPUT_USER_DEACTIVATED") {
-//                     await fetchWithTimeout(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: USER_DEACTIVATED - STARTED NEW USER PROCESS`);
+//                     await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}: USER_DEACTIVATED - STARTED NEW USER PROCESS`);
 //                     const url = `${process.env.tgmanager}/clients/setupClient/${process.env.clientId}?a=no`;
 //                     await fetchWithTimeout(url);
 //                 }
@@ -538,10 +538,10 @@ export interface IChannel {
 
 // async function startNewUserProcess(error: any) {
 //     if (error.errorMessage === 'AUTH_KEY_DUPLICATED') {
-//         await fetchWithTimeout(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: AUTH KEY DUPLICATED`);
+//         await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}: AUTH KEY DUPLICATED`);
 //     }
 //     if ((error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") && error.errorMessage !== "INPUT_USER_DEACTIVATED") {
-//         await fetchWithTimeout(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: USER_DEACTIVATED - STARTED NEW USER PROCESS`);
+//         await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}: USER_DEACTIVATED - STARTED NEW USER PROCESS`);
 //         const url = `${process.env.tgmanager}/clients/clients/setupClient/${process.env.clientId}?archiveOld=false&formalities=false`;
 //         await fetchWithTimeout(url);
 //     }
@@ -565,7 +565,7 @@ export interface IChannel {
 //         } catch (error) {
 //             console.log(error)
 //         }
-//         await fetchWithTimeout(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: Failed To Check Health`);
+//         await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}: Failed To Check Health`);
 
         
 //     }

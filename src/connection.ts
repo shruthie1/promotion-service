@@ -35,14 +35,14 @@ async function retryConnection() {
     } else {
         retryTime++;
         if (retryTime > 1) {
-            // await fetchWithTimeout(`${ppplbot}&text=${encodeURIComponent(`${process.env.clientId}: Exitting as-\nProcessId:${prcessID}\nMongo-${UserDataDtoCrud.getInstance()?.isConnected}\nTGClient-${tgClass.getClient()?.connected}\nRetryCount: ${retryTime}`)}`);
+            // await fetchWithTimeout(`${ppplbot()}&text=${encodeURIComponent(`${process.env.clientId}: Exitting as-\nProcessId:${prcessID}\nMongo-${UserDataDtoCrud.getInstance()?.isConnected}\nTGClient-${tgClass.getClient()?.connected}\nRetryCount: ${retryTime}`)}`);
         }
         if (retryTime > 5) {
             console.log("Exitiing");
             // await fetchWithTimeout(`${process.env.uptimebot}/refreshmap`)
             // await (UserDataDtoCrud.getInstance()).closeConnection();
             // const environmentVariables = getAllEnvironmentVariables();
-            await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}:UNABLE TO START at RETRY - EXITTING\n\nPid:${process.pid}\n\nenv: ${process.env.clientId}`);
+            await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}:UNABLE TO START at RETRY - EXITTING\n\nPid:${process.pid}\n\nenv: ${process.env.clientId}`);
             process.exit(1);
             //execSync("refresh");
         }

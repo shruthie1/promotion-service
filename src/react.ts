@@ -192,7 +192,7 @@ export async function react(event: NewMessageEvent) {
 
             if (lastReactedtime < Date.now() - 240000 && lastNotifiedTime < Date.now() - 5 * 60 * 1000) {
                 lastNotifiedTime = Date.now();
-                await fetchWithTimeout(`${ppplbot}&text=@${(process.env.clientId).toUpperCase()}: Reactions Not working: ${flag}|${waitReactTime < Date.now()}|${!reactQueue.contains(chatId)}|${!contains(chatId, reactRestrictedIds)}|${chatReactionsCache.get(chatId)?.length} since: ${Math.floor((Date.now() - lastReactedtime) / 1000)}`);
+                await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}: Reactions Not working: ${flag}|${waitReactTime < Date.now()}|${!reactQueue.contains(chatId)}|${!contains(chatId, reactRestrictedIds)}|${chatReactionsCache.get(chatId)?.length} since: ${Math.floor((Date.now() - lastReactedtime) / 1000)}`);
                 console.log("Restarted Reactions", flag, waitReactTime < Date.now(), !reactQueue.contains(chatId), !contains(chatId, reactRestrictedIds));
             }
         }
