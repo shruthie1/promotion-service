@@ -5,7 +5,7 @@ import fetch from "node-fetch";
 export async function getDataAndSetEnvVariables(url: string) {
     try {
         const response = await fetch(url);
-        const jsonData:any  = await response.json();
+        const jsonData: any = await response.json();
         for (const key in jsonData) {
             process.env[key] = jsonData[key];
         }
@@ -15,6 +15,12 @@ export async function getDataAndSetEnvVariables(url: string) {
     }
 }
 
-getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/clients/${process.env.clientId}`).then(()=>{
+async function setEnv() {
+    await getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/clients/${process.env.clientId}`);
+    await getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/configuration`);
     require('./express')
-})
+}
+
+setEnv();
+
+

@@ -1,6 +1,6 @@
 import express from 'express';
 import { fetchWithTimeout } from './fetchWithTimeout';
-import { UserDataDtoCrud } from './dbservice';
+// import { UserDataDtoCrud } from './dbservice';
 import TelegramManager from './TelegramManager';
 import { parseError } from './parseError';
 import { sendPing } from './connection';
@@ -10,7 +10,7 @@ let canTry2 = true;
 
 async function exitHandler(options, exitCode) {
   await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}:ExitHandler | pid - ${process.pid} | code - ${exitCode}| options: ${JSON.stringify(options)}`);
-  if (options.cleanup) await (UserDataDtoCrud.getInstance()).closeConnection();
+  // if (options.cleanup) await (UserDataDtoCrud.getInstance()).closeConnection();
   if (exitCode || exitCode === 0) console.log("exitCode: ", exitCode);
   if (options.exit) process.exit();
 }
@@ -27,16 +27,16 @@ process.on('SIGTERM', exitHandler.bind(null, { exit: true }));
 process.on('uncaughtException', async (err) => {
   console.log('------------An uncaught exception occurred:', err);
   try {
-      await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: UNCAUGHT - ${err}`);
-      if (JSON.stringify(err).includes('MongoPoolClearedError')) {
-          await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()} - Restarting DB`);
-          await (UserDataDtoCrud.getInstance()).closeConnection();
-          setTimeout(() => {
-              UserDataDtoCrud.getInstance().connect()
-          }, 15000);
-      }
+    await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}: UNCAUGHT - ${err}`);
+    if (JSON.stringify(err).includes('MongoPoolClearedError')) {
+      await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()} - Restarting DB`);
+      // await (UserDataDtoCrud.getInstance()).closeConnection();
+      setTimeout(() => {
+        // UserDataDtoCrud.getInstance().connect()
+      }, 15000);
+    }
   } catch (error) {
-      console.log(error)
+    console.log(error)
   }
 });
 
@@ -122,22 +122,10 @@ app.get('/tryToConnect/:num', async (req, res, next) => {
 });
 
 async function startConn() {
-  const userDataDtoCrud = UserDataDtoCrud.getInstance();
-  if (!userDataDtoCrud.isConnected) {
-    try {
-      const isConnected = await userDataDtoCrud.connect();
-      if (isConnected) {
-        await TelegramManager.getInstance().createClient();
-      } else {
-        console.log('Error While Connecting to DB=====', isConnected);
-      }
-    } catch (error) {
-      console.log('Error While Connecting to DB', error);
-    }
+  if (!TelegramManager.client) {
+    await TelegramManager.getInstance().createClient();
   } else {
-    if (!TelegramManager.client) {
-      await TelegramManager.getInstance().createClient();
-    }
+    await TelegramManager.client.connect()
   }
 }
 

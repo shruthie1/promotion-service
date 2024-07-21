@@ -1,4 +1,3 @@
-import { UserDataDtoCrud } from "./dbservice";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 import { parseError } from "./parseError";
 import TelegramManager from "./TelegramManager";
@@ -26,7 +25,7 @@ function getAllEnvironmentVariables(): { [key: string]: string } {
 }
 
 async function retryConnection() {
-    if (sendPing && UserDataDtoCrud.getInstance()?.isConnected && TelegramManager.getInstance().connected()) {
+    if (sendPing && TelegramManager.getInstance().connected()) {
         try {
             await fetchWithTimeout(`${process.env.promoteChecker}/receive?clientId=${process.env.clientId}`, {}, false);
         } catch (error) {
@@ -41,7 +40,7 @@ async function retryConnection() {
         if (retryTime > 5) {
             console.log("Exitiing");
             // await fetchWithTimeout(`${process.env.uptimebot}/refreshmap`)
-            await (UserDataDtoCrud.getInstance()).closeConnection();
+            // await (UserDataDtoCrud.getInstance()).closeConnection();
             // const environmentVariables = getAllEnvironmentVariables();
             await fetchWithTimeout(`${ppplbot}&text=${(process.env.clientId).toUpperCase()}:UNABLE TO START at RETRY - EXITTING\n\nPid:${process.pid}\n\nenv: ${process.env.clientId}`);
             process.exit(1);
