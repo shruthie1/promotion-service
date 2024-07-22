@@ -6,7 +6,7 @@ import { parseError } from './parseError';
 import { sendPing } from './connection';
 import { ppplbot } from './utils';
 import * as schedule from 'node-schedule-tz';
-import { getReactSleepTime, getLastReactTime, getAverageReactionDelay, getTotalReactions, getTotalFloodcount, getMinWaitTime, getTargetReactionDelay } from './react';
+import { getReactSleepTime, getLastReactTime, getAverageReactionDelay, getTotalReactions, getTotalFloodcount, getMinWaitTime, getTargetReactionDelay, getMe } from './react';
 import { getClient } from './clients.service';
 
 let canTry2 = true;
@@ -161,7 +161,7 @@ app.get('/exitPrimary', (req, res, next) => {
 
 
 app.get('/reactionDetails', async (req, res) => {
-  await fetchWithTimeout(`${ppplbot()}&text=${encodeURIComponent(`${(process.env.clientId).toUpperCase()}\nPresentSleepTime : ${getReactSleepTime()}\nLastReacted : ${Math.floor((Date.now() - getLastReactTime()) / 1000)}\nAverage: ${getAverageReactionDelay()}\nTotal: ${getTotalReactions()}\nfloodcount : ${getTotalFloodcount()}\nminWaitTime: ${getMinWaitTime()}\ntarget: ${getTargetReactionDelay()}`)}`);
+  await fetchWithTimeout(`${ppplbot()}&text=${encodeURIComponent(`${(process.env.clientId).toUpperCase()}\nMe: @${await getMe()}\nPresentSleepTime : ${getReactSleepTime()}\nLastReacted : ${Math.floor((Date.now() - getLastReactTime()) / 1000)}\nAverage: ${getAverageReactionDelay()}\nTotal: ${getTotalReactions()}\nfloodcount : ${getTotalFloodcount()}\nminWaitTime: ${getMinWaitTime()}\ntarget: ${getTargetReactionDelay()}`)}`);
   res.send('ok')
 });
 

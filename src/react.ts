@@ -6,6 +6,7 @@ import { fetchWithTimeout } from "./fetchWithTimeout";
 import { parseError } from "./parseError";
 import { ReactQueue } from "./ReactQueue";
 import { contains, ppplbot } from "./utils";
+import TelegramManager from "./TelegramManager";
 
 export function getReactSleepTime() {
     return reactSleepTime;
@@ -35,6 +36,9 @@ export function getTargetReactionDelay() {
     return targetReactionDelay;
 }
 
+export async function getMe() {
+    return (await TelegramManager.client.getMe()).username;
+}
 
 const standardEmoticons = ['👍', '❤', '🔥', '👏', '🥰', '😁']
 const emoticons = [
