@@ -2,6 +2,9 @@
   "name": "helper",
   "version": "1.0.0",
   "main": "index.js",
+  "engines": {
+    "node": ">=16.0.0 <21.0.0"
+  },
   "scripts": {
     "start": "node  --max-old-space-size=8192 ./out/index.js",
     "start:node": "ts-node index.ts",
