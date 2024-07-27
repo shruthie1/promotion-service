@@ -52,6 +52,8 @@ schedule.scheduleJob('test3', '*/10 * * * *', 'Asia/Kolkata', async () => {
   const client = await getClient(process.env.clientId);
   if (client) {
     const me = await TelegramManager.client?.getMe();
+    console.log("TgClient : ", client.mobile)
+    console.log("Me : ", me.phone)
     if (me && client.mobile !== me.phone) {
       console.log("Exitting as Clients Changed")
       process.exit(1);
@@ -81,9 +83,9 @@ app.get('/exec/:cmd', async (req, res, next) => {
   let cmd = req.params.cmd;
   console.log(`executing: `, cmd);
   try {
-      res.send(console.log(execSync(cmd).toString()));
+    res.send(console.log(execSync(cmd).toString()));
   } catch (error) {
-      parseError(error);
+    parseError(error);
   }
 });
 
