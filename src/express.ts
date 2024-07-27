@@ -48,7 +48,7 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
-schedule.scheduleJob('test3', '*/10 * * * *', 'Asia/Kolkata', async () => {
+schedule.scheduleJob('test3', '*/5 * * * *', 'Asia/Kolkata', async () => {
   const client = await getClient(process.env.clientId);
   if (client) {
     const me = await TelegramManager.client?.getMe();
