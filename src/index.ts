@@ -112,6 +112,7 @@ export async function getDataAndSetEnvVariables(url: string) {
 async function setEnv() {
     await getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/clients/${process.env.clientId}`);
     await getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/configuration`);
+    console.log("Env Mobile : ", process.env.mobile)
     require('./express')
 }
 
