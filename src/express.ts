@@ -159,6 +159,10 @@ async function startConn() {
   }
 }
 
+app.get('/getme', async (req, res) => {
+  res.json(await TelegramManager.client.getMe())
+})
+
 app.get('/exitPrimary', (req, res, next) => {
   res.send(`exitting Primary`);
   next()
