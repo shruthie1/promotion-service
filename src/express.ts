@@ -56,6 +56,7 @@ schedule.scheduleJob('test3', '*/5 * * * *', 'Asia/Kolkata', async () => {
     console.log("Me : ", me.phone)
     if (me && client.mobile !== me.phone) {
       console.log("Exitting as Clients Changed")
+      await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}: Exitting as Clients Changed`);
       process.exit(1);
     } else {
       console.log("All Good as Client")
