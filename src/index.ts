@@ -111,8 +111,8 @@ export async function getDataAndSetEnvVariables(url: string) {
 }
 
 async function setEnv() {
-    await getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/clients/${process.env.clientId}`);
-    await getDataAndSetEnvVariables(`https://uptimechecker2.glitch.me/configuration`);
+    await getDataAndSetEnvVariables(`https://checker-production-8f93.up.railway.app/clients/${process.env.clientId}`);
+    await getDataAndSetEnvVariables(`https://checker-production-8f93.up.railway.app/configuration`);
     console.log("Env Mobile : ", process.env.mobile)
     require('./express')
 }
