@@ -49,7 +49,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 schedule.scheduleJob('test3', '*/5 * * * *', 'Asia/Kolkata', async () => {
-  const client = await getClient(process.env.clientId);
+  const client = await getClient();
   if (client) {
     const me = await TelegramManager.client?.getMe();
     console.log("TgClient : ", client.mobile)
