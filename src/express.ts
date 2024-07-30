@@ -52,9 +52,9 @@ schedule.scheduleJob('test3', '*/5 * * * *', 'Asia/Kolkata', async () => {
   const client = await getClient();
   if (client) {
     const me = await TelegramManager.client?.getMe();
-    console.log("TgClient : ", client.mobile)
+    console.log("TgClient : ", client.phone)
     console.log("Me : ", me.phone)
-    if (me && (client.mobile !== me.phone || process.env.mobile !== me.phone)) {
+    if (me && (client.phone !== me.phone || process.env.mobile !== me.phone)) {
       console.log("Exitting as Clients Changed")
       await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}:Promotions :: Exitting as Clients Changed`);
       process.exit(1);
