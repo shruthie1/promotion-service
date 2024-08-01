@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from "./fetchWithTimeout";
+
 export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -12,14 +14,14 @@ export function contains(str, arr) {
 
 export function selectRandomElements<T>(array: T[], n: number): T[] {
   if (array) {
-      const selectedElements: T[] = [];
-      for (let i = 0; i < n; i++) {
-          const randomIndex = Math.floor(Math.random() * array.length);
-          selectedElements.push(array[randomIndex]);
-      }
-      return selectedElements;
+    const selectedElements: T[] = [];
+    for (let i = 0; i < n; i++) {
+      const randomIndex = Math.floor(Math.random() * array.length);
+      selectedElements.push(array[randomIndex]);
+    }
+    return selectedElements;
   } else {
-      return [];
+    return [];
   }
 }
 
@@ -155,3 +157,9 @@ export const defaultMessages = [
   "9", "10", "11", "12", "13", "14", "15",
   "16", "17", "18"
 ];
+
+export async function startNewUserProcess(error: any) {
+  if (error.errorMessage === 'AUTH_KEY_DUPLICATED' || error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") {
+    process.exit(1)
+  }
+}

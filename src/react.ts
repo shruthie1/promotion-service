@@ -5,7 +5,7 @@ import { sleep } from "telegram/Helpers";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 import { parseError } from "./parseError";
 import { ReactQueue } from "./ReactQueue";
-import { contains, ppplbot } from "./utils";
+import { contains, ppplbot, startNewUserProcess } from "./utils";
 import TelegramManager from "./TelegramManager";
 
 export function getReactSleepTime() {
@@ -116,6 +116,7 @@ export async function react(event: NewMessageEvent) {
                 if (defaultReactions.length > 1) {
                     chatReactionsCache.set(chatId, defaultReactions);
                 }
+                await startNewUserProcess(error)
             } finally {
                 flag2 = true;
             }
@@ -176,6 +177,7 @@ export async function react(event: NewMessageEvent) {
                         const chatEntity = <Api.Channel>await getEntity(event.client, chatId);
                         console.log('Failed to React:', reaction[0]?.toJSON().emoticon, chatEntity?.toJSON().username, error.errorMessage);
                     }
+                    await startNewUserProcess(error)
                 }
                 flag = true;
             } else {
