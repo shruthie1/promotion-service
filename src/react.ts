@@ -95,6 +95,7 @@ export async function react(event: NewMessageEvent) {
     const reactQueue = ReactQueue.getInstance();
 
     try {
+        await event.client.connect();
         if (!chatReactionsCache.has(chatId) && flag2) {
             flag2 = false;
             try {
@@ -204,6 +205,9 @@ export async function react(event: NewMessageEvent) {
         }
     } catch (error) {
         parseError(error, "Reaction Error");
+        if(error.errorMessage == 'CONNECTION_NOT_INITED'){
+            process.exit(1);
+        }
         flag = true;
         flag2 = true;
     }
