@@ -102,6 +102,20 @@ app.get('/getProcessId', async (req, res) => {
   res.json({ ProcessId: prcessID.toString() });
 });
 
+app.get('/chat/:chatId', async (req, res) => {
+  const chatId = req.params.chatId;
+  const offset = parseInt(req.query.offset as string || '0');
+  const minId = parseInt(req.query.minId as string || '0');
+  const limit = parseInt(req.query.limit as string || '0');
+  if (await TelegramManager.client) {
+    console.log("ChatRequest: ", chatId, offset, minId, limit);
+    res.send(await TelegramManager.getInstance().getMessagesNew(chatId, offset, minId, limit));
+  } else {
+    console.log('Tg Class Instance not exist');
+    res.send([]);
+  }
+});
+
 app.get('/tryToConnect/:num', async (req, res, next) => {
   res.send('OK');
   next();

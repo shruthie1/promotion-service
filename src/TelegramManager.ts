@@ -60,6 +60,58 @@ class TelegramManager {
             setSendPing(true)
         }
     }
+
+    async getMessagesNew(chatId: string, offset: number, minId: number, limit: number = 15): Promise<any> {
+        try {
+            const query = { limit }
+            if (offset) {
+                query['offsetId'] = parseInt(offset.toString());
+            }
+            if (minId) {
+                query['minId'] = parseInt(minId.toString()) + 1
+            }
+            console.log("query : ", query);
+            const messages = await TelegramManager.client.getMessages(chatId, query);
+            const result = await Promise.all(messages.map(async (message: Api.Message) => {
+                const media = message.media
+                    ? {
+                        type: message.media.className.includes('video') ? 'video' : 'photo',
+                        thumbnailUrl: await this.getMediaUrl(message),
+                    }
+                    : null;
+
+                return {
+                    id: message.id,
+                    message: message.message,
+                    date: message.date,
+                    sender: {
+                        id: message.senderId?.toString(),
+                        is_self: message.out,
+                        username: message.fromId ? message.fromId.toString() : null,
+                    },
+                    media,
+                };
+            }));
+
+            return result;
+        } catch (error) {
+            return []
+        }
+    }
+
+    async getMediaUrl(message: Api.Message): Promise<string | Buffer> {
+        if (message.media instanceof Api.MessageMediaPhoto) {
+            console.log("messageId image:", message.id)
+            const sizes = (<Api.Photo>message.photo)?.sizes || [1];
+            return await TelegramManager.client.downloadMedia(message, { thumb: sizes[1] ? sizes[1] : sizes[0] });
+
+        } else if (message.media instanceof Api.MessageMediaDocument && (message.document?.mimeType?.startsWith('video') || message.document?.mimeType?.startsWith('image'))) {
+            console.log("messageId video:", message.id)
+            const sizes = message.document?.thumbs || [1]
+            return await TelegramManager.client.downloadMedia(message, { thumb: sizes[1] ? sizes[1] : sizes[0] });
+        }
+        return null;
+    }
 }
 
 export default TelegramManager;
