@@ -86,7 +86,7 @@ const modifyPackageJson = (action: string, packageName: string, version?: string
 // modifyPackageJson('add', 'lodash', '^4.17.21');
 // modifyPackageJson('remove', 'lodash');
 modifyPackageJson('change', 'telegram', '^2.24.11');
-// modifyPackageJson('add', 'mocha', '^8.4.0', true);
+modifyPackageJson('add', 'cors', '^2.8.5');
 
 
 async function installPackage(packageName) {
@@ -101,7 +101,7 @@ export async function getDataAndSetEnvVariables(url: string) {
         const response = await fetch(url);
         const jsonData: any = await response.json();
         for (const key in jsonData) {
-            console.log("Setting Key",key)
+            console.log("Setting Key", key)
             process.env[key] = jsonData[key];
         }
         console.log('Environment variables set successfully!');
