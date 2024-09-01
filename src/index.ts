@@ -87,10 +87,10 @@ const modifyPackageJson = (action: string, packageName: string, version?: string
 // modifyPackageJson('remove', 'lodash');
 modifyPackageJson('change', 'telegram', '^2.24.11');
 modifyPackageJson('add', 'cors', '^2.8.5');
+installPackage()
 
-
-async function installPackage(packageName) {
-    const installProcess = spawn('npm', ['install', packageName, '--save']);
+async function installPackage() {
+    const installProcess = spawn('npm', ['install']);
     installProcess.stdout.on('data', (data) => console.log(data.toString()));
     installProcess.stderr.on('data', (data) => console.error(data.toString()));
     await new Promise((resolve) => installProcess.on('close', resolve));
