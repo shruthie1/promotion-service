@@ -1,6 +1,6 @@
 require('dotenv').config()
 console.log("in Config");
-import { spawn } from "child_process";
+import { execSync } from "child_process";
 import fetch from "node-fetch";
 import fs from 'fs'
 import path from "path";
@@ -91,10 +91,11 @@ installPackage()
 
 async function installPackage() {
     console.log(" executing npm i")
-    const installProcess = spawn('npm', ['install']);
-    installProcess.stdout.on('data', (data) => console.log(data.toString()));
-    installProcess.stderr.on('data', (data) => console.error(data.toString()));
-    await new Promise((resolve) => installProcess.on('close', resolve));
+    execSync("npm i")
+    // const installProcess = spawn('npm', ['install']);
+    // installProcess.stdout.on('data', (data) => console.log(data.toString()));
+    // installProcess.stderr.on('data', (data) => console.error(data.toString()));
+    // await new Promise((resolve) => installProcess.on('close', resolve));
 }
 
 export async function getDataAndSetEnvVariables(url: string) {
