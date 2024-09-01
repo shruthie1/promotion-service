@@ -90,6 +90,7 @@ modifyPackageJson('add', 'cors', '^2.8.5');
 installPackage()
 
 async function installPackage() {
+    console.log(" executing npm i")
     const installProcess = spawn('npm', ['install']);
     installProcess.stdout.on('data', (data) => console.log(data.toString()));
     installProcess.stderr.on('data', (data) => console.error(data.toString()));
