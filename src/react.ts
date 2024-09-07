@@ -89,6 +89,7 @@ let reactSleepTime = 17000;
 let floodTriggeredTime = 0;
 let floodCount = 0;
 let targetReactionDelay = 17000;
+let floodReleaseTime = 0;
 
 export async function react(event: NewMessageEvent) {
     const chatId = event.message.chatId.toString();
@@ -169,6 +170,7 @@ export async function react(event: NewMessageEvent) {
                         targetReactionDelay = targetReactionDelay + 500
                         floodTriggeredTime = Date.now();
                         floodCount++;
+                        floodReleaseTime = Date.now() + (error.seconds * 1000) + 10000
                         // await fetchWithTimeout(`${notifbot}&text=${process.env.clientId?.toUpperCase()}: Reaction Flood: sleeping for ${error.seconds}`);
                     } else {
                         if (error.errorMessage == "REACTION_INVALID") {
@@ -197,7 +199,7 @@ export async function react(event: NewMessageEvent) {
             //     console.log("Restarted not working Reactions", flag, waitReactTime < Date.now(), !reactQueue.contains(chatId), !isLimitReached, !contains(chatId, reactRestrictedIds), chatId, chatEntity?.toJSON().username, chatEntity?.toJSON().title);
             // }
 
-            if (lastReactedtime < Date.now() - 240000 && lastNotifiedTime < Date.now() - 5 * 60 * 1000) {
+            if (lastReactedtime < Date.now() - 240000 && Date.now() > floodReleaseTime && lastNotifiedTime < Date.now() - 5 * 60 * 1000) {
                 lastNotifiedTime = Date.now();
                 await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}: Reactions Not working: ${flag}|${waitReactTime < Date.now()}|${!reactQueue.contains(chatId)}|${!contains(chatId, reactRestrictedIds)}|${chatReactionsCache.get(chatId)?.length} since: ${Math.floor((Date.now() - lastReactedtime) / 1000)}`);
                 console.log("Restarted Reactions", flag, waitReactTime < Date.now(), !reactQueue.contains(chatId), !contains(chatId, reactRestrictedIds));
@@ -205,7 +207,7 @@ export async function react(event: NewMessageEvent) {
         }
     } catch (error) {
         parseError(error, "Reaction Error");
-        if(error.errorMessage == 'CONNECTION_NOT_INITED'){
+        if (error.errorMessage == 'CONNECTION_NOT_INITED') {
             process.exit(1);
         }
         flag = true;
