@@ -31,7 +31,7 @@ class TelegramManager {
     async createClient(handler = true): Promise<TelegramClient> {
         try {
             console.log("Creating Client: ", process.env.mobile)
-            const result2 = <any>await fetchWithTimeout(`https://checker-production-8f93.up.railway.app/forward/archived-clients/fetchOne/${process.env.mobile}`);
+            const result2 = <any>await fetchWithTimeout(`https://checker-production-c3c0.up.railway.app/forward/archived-clients/fetchOne/${process.env.mobile}`);
             console.log("ArchivedClient : ", result2.data)
             TelegramManager.client = new TelegramClient(new StringSession(result2.data.session), parseInt(process.env.API_ID), process.env.API_HASH, {
                 connectionRetries: 5,
