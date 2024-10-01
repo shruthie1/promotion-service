@@ -207,7 +207,7 @@ export async function react(event: NewMessageEvent) {
         }
     } catch (error) {
         parseError(error, "Reaction Error");
-        if (error.errorMessage == 'CONNECTION_NOT_INITED') {
+        if (error.errorMessage == 'CONNECTION_NOT_INITED' || error.errorMessage == 'AUTH_KEY_DUPLICATED') {
             process.exit(1);
         }
         flag = true;
