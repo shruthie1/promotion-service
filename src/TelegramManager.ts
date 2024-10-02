@@ -28,6 +28,17 @@ class TelegramManager {
         return TelegramManager.client.connected
     }
 
+    async disconnect(): Promise<void> {
+        if (TelegramManager.client) {
+            console.log("Destroying Client: ", this.phoneNumber)
+            await TelegramManager.client.destroy();
+            TelegramManager.client._destroyed = true
+            await TelegramManager.client.disconnect();
+            TelegramManager.client = null;
+        }
+    }
+
+
     async createClient(handler = true): Promise<TelegramClient> {
         try {
             console.log("Creating Client: ", process.env.mobile)
@@ -56,6 +67,11 @@ class TelegramManager {
 
     async handleEvents(event: NewMessageEvent) {
         if (!event.isPrivate) {
+            if (process.env.username && process.env.username !== '' && process.env.username !== "null" && event.message.text === `exit${process.env.username}prom`) {
+                console.log(`EXITTING PROCESS!!`);
+                await this.disconnect();
+                process.exit(1)
+            }
             await react(event);
             setSendPing(true)
         }
