@@ -138,7 +138,7 @@ export function ppplbot(chatId?: string, botToken?: string) {
     }
     botCount++;
   }
-  const targetChatId = chatId || '-1001801844217'; // Replace with actual chat ID
+  const targetChatId = chatId || process.env.notifChannel; // Replace with actual chat ID
   const apiUrl = `https://api.telegram.org/${token}/sendMessage?chat_id=${targetChatId}`;
   return apiUrl;
 };
