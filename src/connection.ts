@@ -46,7 +46,7 @@ async function retryConnection() {
             process.exit(1);
             //execSync("refresh");
         }
-        if (!process.env.repl?.includes("glitch")) {
+        if (!process.env.promoteRepl?.includes("glitch")) {
             const resp = await fetchWithTimeout(`${process.env.repl}/getProcessId`, { timeout: 100000 });
             try {
                 console.log(resp);
