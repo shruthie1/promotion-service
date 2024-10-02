@@ -1,3 +1,4 @@
+import axios from "axios";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 
 export function sleep(ms) {
@@ -159,7 +160,13 @@ export const defaultMessages = [
 ];
 
 export async function startNewUserProcess(error: any) {
-  if (error.errorMessage === 'AUTH_KEY_DUPLICATED' || error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") {
+  if (error.errorMessage == 'CONNECTION_NOT_INITED' || error.errorMessage == 'AUTH_KEY_DUPLICATED') {
+    await axios.delete(`${process.env.tgcms}/archived-clients/${process.env.mobile}`);
+    console.log("Deleting Archived Client")
+    process.exit(1);
+}
+  if (error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") {
+    console.log("Exitiing")
     process.exit(1)
   }
 }

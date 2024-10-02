@@ -7,6 +7,7 @@ import { parseError } from "./parseError";
 import { ReactQueue } from "./ReactQueue";
 import { contains, ppplbot, startNewUserProcess } from "./utils";
 import TelegramManager from "./TelegramManager";
+import axios from "axios";
 
 export function getReactSleepTime() {
     return reactSleepTime;
@@ -208,6 +209,8 @@ export async function react(event: NewMessageEvent) {
     } catch (error) {
         parseError(error, "Reaction Error");
         if (error.errorMessage == 'CONNECTION_NOT_INITED' || error.errorMessage == 'AUTH_KEY_DUPLICATED') {
+            await axios.delete(`${process.env.tgcms}/archived-clients/${process.env.mobile}`);
+            console.log("Deleting Archived Client")
             process.exit(1);
         }
         flag = true;

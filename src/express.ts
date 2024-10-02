@@ -79,6 +79,7 @@ app.get('/exit', (req, res, next) => {
   res.send("Exitting");
   next()
 }, (req, res) => {
+  console.log("Exitting")
   process.exit(1);
 })
 
