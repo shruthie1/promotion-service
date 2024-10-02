@@ -14,7 +14,7 @@ import { execSync } from 'child_process';
 let canTry2 = true;
 
 async function exitHandler(options, exitCode) {
-  await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}:ExitHandler | pid - ${process.pid} | code - ${exitCode}| options: ${JSON.stringify(options)}`);
+  await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}-PROM : ExitHandler | pid - ${process.pid} | code - ${exitCode}| options: ${JSON.stringify(options)}`);
   // if (options.cleanup) await (UserDataDtoCrud.getInstance()).closeConnection();
   if (exitCode || exitCode === 0) console.log("exitCode: ", exitCode);
   if (options.exit) process.exit();
