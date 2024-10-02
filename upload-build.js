@@ -16,7 +16,7 @@ async function overwriteFile(branch) {
       resource_type: 'auto',
       overwrite: true,
       invalidate: true,
-      public_id: `index-pms-${branch}.js`
+      public_id: `pms-${branch}.js`
     });
     console.log(result);
 
