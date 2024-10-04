@@ -208,11 +208,7 @@ export async function react(event: NewMessageEvent) {
         }
     } catch (error) {
         parseError(error, "Reaction Error");
-        if (error.errorMessage == 'CONNECTION_NOT_INITED' || error.errorMessage == 'AUTH_KEY_DUPLICATED') {
-            await axios.delete(`${process.env.tgcms}/archived-clients/${process.env.mobile}`);
-            console.log("Deleting Archived Client")
-            process.exit(1);
-        }
+        await startNewUserProcess(error)
         flag = true;
         flag2 = true;
     }

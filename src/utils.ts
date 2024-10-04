@@ -161,12 +161,14 @@ export const defaultMessages = [
 
 export async function startNewUserProcess(error: any) {
   if (error.errorMessage == 'CONNECTION_NOT_INITED' || error.errorMessage == 'AUTH_KEY_DUPLICATED') {
+    await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}-PROM: AUTH KEY DUPLICATED : Deleting Archived Client`);
+    console.log("AUTH KEY DUPLICATED : Deleting Archived Client")
     await axios.delete(`${process.env.tgcms}/archived-clients/${process.env.mobile}`);
-    console.log("Deleting Archived Client")
     process.exit(1);
-}
+  }
   if (error.errorMessage === "USER_DEACTIVATED_BAN" || error.errorMessage === "USER_DEACTIVATED") {
-    console.log("Exitiing")
+    await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}-PROM: USER_DEACTIVATED : Exitiing`);
+    console.log("USER_DEACTIVATED : Exitiing")
     process.exit(1)
   }
 }
