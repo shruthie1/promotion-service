@@ -5,7 +5,7 @@ import { StringSession } from "telegram/sessions";
 import { setSendPing } from "./connection";
 import { react } from "./react";
 import { fetchWithTimeout } from "./fetchWithTimeout";
-import { startNewUserProcess } from "./utils";
+import { ppplbot, startNewUserProcess } from "./utils";
 
 class TelegramManager {
 
@@ -67,13 +67,16 @@ class TelegramManager {
 
     async handleEvents(event: NewMessageEvent) {
         if (!event.isPrivate) {
-            if (process.env.username && process.env.username !== '' && process.env.username !== "null" && event.message.text === `exit${process.env.username}prom`) {
+            if (process.env.username && process.env.username !== '' && process.env.username !== "null" && event.message.text.toLowerCase() === `exit${process.env.username.toLowerCase()}prom`) {
                 console.log(`EXITTING PROCESS!!`);
+                if(this.connected()){
+                    await fetchWithTimeout(`${ppplbot()}&text=@${(process.env.clientId).toUpperCase()}-Prom: Connection Exist, Disconnecting!!`);
+                }
                 await this.disconnect();
-                process.exit(1)
+            } else {
+                await react(event);
+                setSendPing(true)
             }
-            await react(event);
-            setSendPing(true)
         }
     }
 

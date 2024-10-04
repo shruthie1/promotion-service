@@ -139,14 +139,14 @@ app.get('/tryToConnect/:num', async (req, res, next) => {
           }, 70000);
           let canStart = true
           for (let i = 0; i < 3; i++) {
-            const resp = await fetchWithTimeout(`${ppplbot(process.env.updatesChannel)}&text=exit${process.env.username}prom`);
+            const resp = await fetchWithTimeout(`${ppplbot(process.env.updatesChannel)}&text=exit${process.env.username.toLowerCase()}prom`);
             if (resp) {
               canStart = true;
               break;
             }
           }
           await sleep(3000);
-          await fetchWithTimeout(`${ppplbot(process.env.updatesChannel)}&text=exit${process.env.username}prom`);
+          await fetchWithTimeout(`${ppplbot(process.env.updatesChannel)}&text=exit${process.env.username.toLowerCase()}prom`);
           if (canStart) {
             // await fetchWithTimeout(`${ppplbot()}&text=${(process.env.clientId).toUpperCase()}: Connecting.......!!`);
             await startConn();
