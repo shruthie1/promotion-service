@@ -6,11 +6,11 @@ export async function getClient() {
         if (result.data) {
             return result.data
         } else {
-            const client = await fetchWithTimeout(`${process.env.uptimebot}/clients/${process.env.clientId}`);
+            const client = await fetchWithTimeout(`${process.env.promoteChecker}/clients/${process.env.clientId}`);
             return client.data
         }
     } catch (error) {
-        const client = await fetchWithTimeout(`${process.env.promoteChecker}/clients/${process.env.clientId}`);
+        const client = await fetchWithTimeout(`${process.env.uptimebot}/clients/${process.env.clientId}`);
         return client.data
     }
 }
