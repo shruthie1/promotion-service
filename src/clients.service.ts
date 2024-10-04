@@ -10,7 +10,7 @@ export async function getClient() {
             return client.data
         }
     } catch (error) {
-        const client = await fetchWithTimeout(`${process.env.tgcms}/clients/${process.env.clientId}`);
+        const client = await fetchWithTimeout(`${process.env.promoteChecker}/clients/${process.env.clientId}`);
         return client.data
     }
 }
