@@ -1,6 +1,16 @@
 import { fetchWithTimeout } from "./fetchWithTimeout";
 
 export async function getClient() {
-    const result = await fetchWithTimeout(`${process.env.repl}/getme`);
-    return result.data
+    try {
+        const result = await fetchWithTimeout(`${process.env.repl}/getme`);
+        if (result.data) {
+            return result.data
+        } else {
+            const client = await fetchWithTimeout(`${process.env.uptimebot}/clients/${process.env.clientId}`);
+            return client.data
+        }
+    } catch (error) {
+        const client = await fetchWithTimeout(`${process.env.tgcms}/clients/${process.env.clientId}`);
+        return client.data
+    }
 }
