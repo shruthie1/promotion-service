@@ -157,6 +157,19 @@ export async function react(event: NewMessageEvent) {
                         }
                     }
 
+                    try {
+                        event.client.invoke(new Api.messages.SetTyping({
+                            peer: event.chatId,
+                            action: new Api.SendMessageTypingAction(),
+                        }))
+                    } catch (error) {
+
+                    }
+                    try {
+                        event.client.markAsRead(event.chatId);
+                    } catch (error) {
+
+                    }
                     const chatEntity = <Api.Channel>await getEntity(event.client, chatId);
                     console.log("Reacted Successfully, Average Reaction Delay:", averageReactionDelay, "ms", reaction[0]?.toJSON().emoticon, chatEntity?.toJSON().title, chatEntity?.toJSON().username);
                     reactQueue.push(chatId);
@@ -190,9 +203,12 @@ export async function react(event: NewMessageEvent) {
             }
         } else {
             if (lastReactedtime < Date.now() - 60000 && (!flag || reactQueue.contains(chatId)) && reactionsRestarted < Date.now() - 30000) {
-                flag = true;
-                reactionsRestarted = Date.now();
                 console.log("Restarted Reactions", flag, waitReactTime < Date.now(), !reactQueue.contains(chatId), !contains(chatId, reactRestrictedIds));
+                this.flag = true;
+                this.lastReactedtime = Date.now();
+                this.waitReactTime = Date.now();
+                this.reactQueue.clear()
+                this.reactionsRestarted = Date.now();
             }
 
             // if (lastReactedtime < Date.now() - 240000) {
