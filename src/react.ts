@@ -207,7 +207,7 @@ export async function react(event: NewMessageEvent) {
                 flag = true;
                 lastReactedtime = Date.now();
                 waitReactTime = Date.now();
-                reactQueue.clear()
+                //reactQueue.clear()
                 reactionsRestarted = Date.now();
             }
 
