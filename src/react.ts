@@ -204,11 +204,11 @@ export async function react(event: NewMessageEvent) {
         } else {
             if (lastReactedtime < Date.now() - 60000 && (!flag || reactQueue.contains(chatId)) && reactionsRestarted < Date.now() - 30000) {
                 console.log("Restarted Reactions", flag, waitReactTime < Date.now(), !reactQueue.contains(chatId), !contains(chatId, reactRestrictedIds));
-                this.flag = true;
-                this.lastReactedtime = Date.now();
-                this.waitReactTime = Date.now();
-                this.reactQueue.clear()
-                this.reactionsRestarted = Date.now();
+                flag = true;
+                lastReactedtime = Date.now();
+                waitReactTime = Date.now();
+                reactQueue.clear()
+                reactionsRestarted = Date.now();
             }
 
             // if (lastReactedtime < Date.now() - 240000) {
